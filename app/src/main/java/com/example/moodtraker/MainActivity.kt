@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Leaderboard
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
@@ -69,6 +70,7 @@ import com.example.moodtraker.screen.CalendarScreen
 import com.example.moodtraker.screen.GraphScreen
 import com.example.moodtraker.screen.LogScreen
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
+import com.google.android.gms.games.leaderboard.Leaderboard
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -105,7 +107,7 @@ fun AppMain(){
 
     val navItems = listOf(
         NavigationItem("캘린더", Icons.Default.DateRange, "tab1"),
-        NavigationItem("통계", Icons.Default.Star, "tab2"),
+        NavigationItem("통계", Icons.Default.Leaderboard, "tab2"),
         NavigationItem("설정", Icons.Default.Settings, "tab3")
     )
 
@@ -141,12 +143,13 @@ fun AppMain(){
                             Icon(
                                 imageVector = nav.icon,
                                 contentDescription = nav.name,
-                                tint = if (isCurrentRoute) Color.White else Color(0xFFD4D6E9)
+                                tint = if (isCurrentRoute) Color.White else Color(0xFFD4D6E9),
+                                modifier = Modifier.size(30.dp)
                             )
-                            Text(
-                                text = nav.name,
-                                color = if (isCurrentRoute) Color.White else Color(0xFFD4D6E9)
-                            )
+//                            Text(
+//                                text = nav.name,
+//                                color = if (isCurrentRoute) Color.White else Color(0xFFD4D6E9)
+//                            )
                         }
                     }
                 }
