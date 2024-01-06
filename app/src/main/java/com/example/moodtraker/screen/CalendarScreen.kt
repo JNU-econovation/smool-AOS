@@ -1,6 +1,7 @@
 package com.example.moodtraker.screen
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,6 +41,7 @@ import java.util.Locale
 
 @Composable
 fun CalendarScreen(){
+
     LogNav(navHostController = rememberNavController())
 
 }
@@ -53,21 +56,37 @@ fun CalendarContent() {
     Surface(
         //color = MaterialTheme.colorScheme.backgroundv
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF3F274A)
     ) {
-        Column(
+
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF433E76),
+                            Color(0xFF9394BB)
+                        )
+                    )
+                )
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
-            CalendarHeader(time)
-            //CalendarHeaderBtn(time)
-            Spacer(modifier = Modifier.height(16.dp))
-            CalendarDayName()
-            CalendarDayList(time)
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(40.dp))
+                CalendarHeader(time)
+                //CalendarHeaderBtn(time)
+                Spacer(modifier = Modifier.height(16.dp))
+                CalendarDayName()
+                CalendarDayList(time)
+            }
+
         }
+
     }
 }
 
