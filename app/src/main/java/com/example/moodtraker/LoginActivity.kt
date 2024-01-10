@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,11 +100,14 @@ fun LoginScreen(){
         ) {
 
             Box(
-                modifier = Modifier.zIndex(1f)
+                modifier = Modifier
+                    .zIndex(1f)
+                    .width(300.dp)
+                    .offset(0.dp,(-30).dp)
 
             ) {
                 Image(
-                    modifier = Modifier.size(70.dp),
+                    modifier = Modifier.size(60.dp).align(Alignment.Center),
                     painter = painterResource(id = R.drawable.personback),
                     contentDescription = "person"
                 )
