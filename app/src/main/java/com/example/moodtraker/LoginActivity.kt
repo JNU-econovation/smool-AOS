@@ -266,6 +266,8 @@ fun PasswordField(
     submit : () -> Unit
 ) {
 
+    val focusManager = LocalFocusManager.current
+
     var passwordVisible by remember { mutableStateOf(false) }
 
     val leadingIcon = @Composable {
@@ -296,7 +298,7 @@ fun PasswordField(
         trailingIcon = trailingIcon,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(
-            onDone = { submit() }
+            onDone = { focusManager.clearFocus(); submit() }
         ),
         placeholder = { Text(placeholder) },
         singleLine = true,
