@@ -27,22 +27,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.moodtraker.screen.CalendarScreen
 import com.example.moodtraker.screen.GraphScreen
-import com.example.moodtraker.screen.LogScreen
+import com.example.moodtraker.screen.LogScaffold
+import com.example.moodtraker.screen.SettingScreen
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
 
 class MainActivity : ComponentActivity() {
@@ -134,12 +135,15 @@ fun AppMain(){
         ) {
             composable("tab1") {
                 CalendarScreen()
+                //SubNavigation(navController)
             }
+
             composable("tab2") {
-                LogScreen()
+                //LogScreen(navBackStackEntry.arguments?.getString("resultTime"))
+                GraphScreen()
             }
             composable("tab3") {
-                GraphScreen()
+                SettingScreen()
             }
         }
 
@@ -152,6 +156,29 @@ fun AppMain(){
     }
 
 }
+
+//@Composable
+//fun SubNavigation(navController: NavHostController) {
+//    val nestedNavController = rememberNavController()
+//
+//    // Nested Navigation을 이용하여 LogScreen 추가
+//    NavHost(
+//        navController = nestedNavController,
+//        startDestination = "CalendarScreen"
+//    ) {
+//        composable("CalendarScreen") {
+//            CalendarScreen()
+//        }
+//        composable(
+//            "LogScreen/{resultTime}",
+//            arguments = listOf(navArgument("resultTime") { type = NavType.StringType })
+//        ) { navBackStackEntry ->
+//            // 여기서 필요한 데이터를 추출하여 LogScreen에 전달
+//            val resultTime = navBackStackEntry.arguments?.getString("resultTime")
+//            LogScaffold(resultTime = resultTime)
+//        }
+//    }
+//}
 
 data class NavigationItem(
     val name : String,

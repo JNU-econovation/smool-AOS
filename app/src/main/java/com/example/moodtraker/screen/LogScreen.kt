@@ -1,9 +1,5 @@
 package com.example.moodtraker.screen
 
-import android.app.DatePickerDialog
-import android.content.Context
-import android.os.Build
-import android.util.Log
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.SnackbarHost
@@ -14,7 +10,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,21 +46,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -85,32 +72,29 @@ import androidx.compose.ui.unit.sp
 import com.example.moodtraker.R
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
-import com.maxkeppeler.sheets.calendar.CalendarDialog
-import com.maxkeppeler.sheets.calendar.models.CalendarConfig
-import com.maxkeppeler.sheets.calendar.models.CalendarSelection
-import com.maxkeppeler.sheets.calendar.models.CalendarStyle
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.LocalDate
+import java.time.Month
+import java.time.Year
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.roundToInt
 
-@Composable
-fun LogScreen() {
-    val scrollState = rememberScrollState()
-
-
-    Surface(
-        //color = MaterialTheme.colorScheme.backgroundv
-        modifier = Modifier.fillMaxSize(),
-        //color = Color(0xFF3F274A)
-
-    ) {
-            LogScaffold()
-
-    }
-}
+//@Composable
+//fun LogScreen(resultTime: String?) {
+//    val scrollState = rememberScrollState()
+//
+//
+//    Surface(
+//        //color = MaterialTheme.colorScheme.backgroundv
+//        modifier = Modifier.fillMaxSize(),
+//        //color = Color(0xFF3F274A)
+//
+//    ) {
+//            LogScaffold()
+//
+//    }
+//}
 
 
 @Composable
@@ -146,7 +130,7 @@ fun topLogBar() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogDatePicker( state : Boolean, onDismiss : () -> Unit) {
+fun LogDatePicker( state : Boolean, onDismiss : () -> Unit, onDateSelected: (selectedDate: Long) -> Unit) {
     val snackState = remember { SnackbarHostState() }
     val snackScope = rememberCoroutineScope()
     SnackbarHost(hostState = snackState, Modifier)
@@ -169,11 +153,17 @@ fun LogDatePicker( state : Boolean, onDismiss : () -> Unit) {
                 TextButton(
                     onClick = {
                         onDismiss()
-                        snackScope.launch {
-                            snackState.showSnackbar(
-                                "Selected date timestamp: ${datePickerState.selectedDateMillis}"
-                            )
+                        datePickerState.selectedDateMillis?.let { selectedDateMillis ->
+                            onDateSelected(selectedDateMillis)
+                            snackScope.launch {
+                                snackState.showSnackbar("Selected date timestamp: $selectedDateMillis")
+                            }
                         }
+//                        snackScope.launch {
+//                            snackState.showSnackbar(
+//                                "Selected date timestamp: ${datePickerState.selectedDateMillis}"
+//                            )
+//                        }
                         //onDate()
                         var date = datePickerState.selectedDateMillis
 
@@ -199,12 +189,24 @@ fun LogDatePicker( state : Boolean, onDismiss : () -> Unit) {
 }
 
 
-
+//date: MutableState<Calendar>
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogHeader(date: MutableState<Calendar>, write: Boolean, standby:Boolean, onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit){
-    val resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(date.value.time)
+fun LogHeader(resultTime: String?, write: Boolean, standby:Boolean, onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit){
+    //val resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(date.value.time)
+
+    val customYear = 2024
+    val customMonth = 1
+    val customDay = 11
+
+    val calendarInstance = Calendar.getInstance().apply {
+        set(Calendar.YEAR, customYear)
+        set(Calendar.MONTH, customMonth - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
+        set(Calendar.DAY_OF_MONTH, customDay)
+    }
+    var resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+
 
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf("수정") }
@@ -231,10 +233,25 @@ fun LogHeader(date: MutableState<Calendar>, write: Boolean, standby:Boolean, onB
 
 
 
-    LogDatePicker(openDialog.value){
-        openDialog.value = false
-        //resultTime = datePickerState.selectedDateMillis
-    }
+//    LogDatePicker(openDialog.value){
+//        onDismiss = { openDialog.value = false }
+//        //resultTime = datePickerState.selectedDateMillis
+//        onDateSelected = { selectedDateMillis ->
+//            // 여기에서 선택된 날짜 처리를 하면 됩니다.
+//            resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(selectedDateMillis)
+//        }
+//    }
+
+
+    LogDatePicker(
+        state = openDialog.value,
+        onDismiss = { openDialog.value = false },
+        onDateSelected = { selectedDateMillis ->
+            //resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(selectedDateMillis)
+        }
+    )
+
+
 
     if (write == true) {
 
@@ -357,10 +374,12 @@ fun LogHeader(date: MutableState<Calendar>, write: Boolean, standby:Boolean, onB
 
             Button(
                 onClick = {
-                    val newDate = Calendar.getInstance()
-                    newDate.time = date.value.time
-                    newDate.add(Calendar.DATE, -1)
-                    date.value = newDate
+//                    val newDate = Calendar.getInstance()
+//                    newDate.time = date.value.time
+//                    newDate.add(Calendar.DATE, -1)
+//                    date.value = newDate
+                    calendarInstance.add(Calendar.DATE, -1)
+                    resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent
@@ -385,10 +404,12 @@ fun LogHeader(date: MutableState<Calendar>, write: Boolean, standby:Boolean, onB
 
             Button(
                 onClick = {
-                    val newDate = Calendar.getInstance()
-                    newDate.time = date.value.time
-                    newDate.add(Calendar.DATE, +1)
-                    date.value = newDate
+//                    val newDate = Calendar.getInstance()
+//                    newDate.time = date.value.time
+//                    newDate.add(Calendar.DATE, +1)
+//                    date.value = newDate
+                    calendarInstance.add(Calendar.DATE, +1)
+                    resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent
@@ -844,13 +865,13 @@ fun LogDiary(content: String) {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun LogScaffold(){
+fun LogScaffold(resultTime: String?, resultDay: Int?){
 
     var write by remember { mutableStateOf(false) }
-    val calendarInstance = Calendar.getInstance()
-    val time = remember {
-        mutableStateOf(calendarInstance)
-    }
+    //val calendarInstance = Calendar.getInstance()
+//    val time = remember {
+//        mutableStateOf(calendarInstance)
+//    }
     var count by remember { mutableStateOf(0) }
     var standby by remember { mutableStateOf(false) }
 
@@ -858,6 +879,10 @@ fun LogScaffold(){
     val focusManager = LocalFocusManager.current
 
     var content by remember { mutableStateOf("") }
+
+    //var present by remember { mutableStateOf(resultTime) }
+
+
 
     Scaffold(
 //        topBar = {
@@ -898,7 +923,7 @@ fun LogScaffold(){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(time, write, standby, onBackClick = { write = !write;  }, onDoneClick = { standby = !standby; focusManager.clearFocus() }, onMenuClick = {  })
+                    LogHeader(resultTime, write, standby, onBackClick = { write = !write;  }, onDoneClick = { standby = !standby; focusManager.clearFocus() }, onMenuClick = {  })
 
                     if (count == 0) {
                         Box(
@@ -909,6 +934,8 @@ fun LogScaffold(){
 
 
                             ) {
+                                //present?.let { Text(it) }
+                                Text("$resultTime ${resultDay}일")
                                 Image(
                                     modifier = Modifier
                                         .width(200.dp)
@@ -1075,6 +1102,6 @@ fun LogFloatingActionButton(count: Int, onClick: () -> Unit) {
 @Composable
 fun LogScreenPreview() {
     MoodtrakerTheme {
-        LogScreen()
+        //LogScreen(navBackStackEntry.arguments?.getString("resultTime"))
     }
 }
