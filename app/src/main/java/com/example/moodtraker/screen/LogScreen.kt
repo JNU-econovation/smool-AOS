@@ -1,5 +1,6 @@
 package com.example.moodtraker.screen
 
+import android.util.Log
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.SnackbarHost
@@ -77,6 +78,7 @@ import java.text.SimpleDateFormat
 import java.time.Month
 import java.time.Year
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -191,22 +193,41 @@ fun LogDatePicker( state : Boolean, onDismiss : () -> Unit, onDateSelected: (sel
 
 //date: MutableState<Calendar>
 
+fun extractYearAndMonth(dateString: String): List<Int> {
+    val pattern = SimpleDateFormat("yyyy년 MM월", Locale.KOREA)
+    val date = pattern.parse(dateString)
+    val calendar = Calendar.getInstance()
+    calendar.time = date ?: Date()
+
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH) + 1 // 월은 0부터 시작하므로 1을 더해줍니다.
+
+    return listOf(year, month)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogHeader(resultTime: String?, write: Boolean, standby:Boolean, onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit){
+fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Boolean, onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit){
+
+    val yearAndMonth = extractYearAndMonth(resultTime.toString())
+
+    val year = yearAndMonth[0]
+    val month = yearAndMonth[1]
     //val resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(date.value.time)
 
-    val customYear = 2024
-    val customMonth = 1
-    val customDay = 11
+
+
+    val customYear = year
+    val customMonth = month
+    val customDay = resultDay
 
     val calendarInstance = Calendar.getInstance().apply {
         set(Calendar.YEAR, customYear)
         set(Calendar.MONTH, customMonth - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
-        set(Calendar.DAY_OF_MONTH, customDay)
+        set(Calendar.DAY_OF_MONTH, customDay!!)
     }
     var resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
-
+    //var resultTime = remember { mutableStateOf(SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)) }
 
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf("수정") }
@@ -380,6 +401,7 @@ fun LogHeader(resultTime: String?, write: Boolean, standby:Boolean, onBackClick:
 //                    date.value = newDate
                     calendarInstance.add(Calendar.DATE, -1)
                     resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+                    Log.d("ResultTimeDebug", "Updated resultTime minus: $resultTime")
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent
@@ -410,6 +432,7 @@ fun LogHeader(resultTime: String?, write: Boolean, standby:Boolean, onBackClick:
 //                    date.value = newDate
                     calendarInstance.add(Calendar.DATE, +1)
                     resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+                    Log.d("ResultTimeDebug", "Updated resultTime plus: $resultTime")
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent
@@ -923,7 +946,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(resultTime, write, standby, onBackClick = { write = !write;  }, onDoneClick = { standby = !standby; focusManager.clearFocus() }, onMenuClick = {  })
+                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write;  }, onDoneClick = { standby = !standby; focusManager.clearFocus() }, onMenuClick = {  })
 
                     if (count == 0) {
                         Box(
