@@ -55,7 +55,7 @@ fun SettingContent() {
 
 
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = "설정",
             color = Color.White,
