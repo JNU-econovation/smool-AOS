@@ -132,7 +132,7 @@ fun topLogBar() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogDatePicker( state : Boolean, onDismiss : () -> Unit, onDateSelected: (selectedDate: Long) -> Unit) {
+fun LogDatePicker( state : Boolean, onDismiss : () -> Unit,  onDateSelected: (year: Int, month: Int, day: Int) -> Unit) {
     val snackState = remember { SnackbarHostState() }
     val snackScope = rememberCoroutineScope()
     SnackbarHost(hostState = snackState, Modifier)
@@ -156,18 +156,27 @@ fun LogDatePicker( state : Boolean, onDismiss : () -> Unit, onDateSelected: (sel
                     onClick = {
                         onDismiss()
                         datePickerState.selectedDateMillis?.let { selectedDateMillis ->
-                            onDateSelected(selectedDateMillis)
-                            snackScope.launch {
-                                snackState.showSnackbar("Selected date timestamp: $selectedDateMillis")
-                            }
+                            val calendar = Calendar.getInstance()
+                            calendar.timeInMillis = selectedDateMillis
+
+                            onDateSelected(
+                                calendar.get(Calendar.YEAR),
+                                calendar.get(Calendar.MONTH) + 1,
+                                calendar.get(Calendar.DAY_OF_MONTH)
+//                                year = calendar.get(Calendar.YEAR),
+//                                month = calendar.get(Calendar.MONTH) + 1,
+//                                day = calendar.get(Calendar.DAY_OF_MONTH)
+                            )
                         }
-//                        snackScope.launch {
-//                            snackState.showSnackbar(
-//                                "Selected date timestamp: ${datePickerState.selectedDateMillis}"
-//                            )
+//                        datePickerState.selectedDateMillis?.let { selectedDateMillis ->
+//                            onDateSelected(selectedDateMillis)
+//                            snackScope.launch {
+//                                snackState.showSnackbar("Selected date timestamp: $selectedDateMillis")
+//                            }
 //                        }
+
                         //onDate()
-                        var date = datePickerState.selectedDateMillis
+                        //var date = datePickerState.selectedDateMillis
 
                     },
                     enabled = confirmEnabled.value
@@ -215,7 +224,18 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
     val month = yearAndMonth[1]
     //val resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(date.value.time)
 
+    val onDateSelected: (year: Int, month: Int, day: Int) -> Unit = { year, month, day ->
+        val customYear = year
+        val customMonth = month
+        val customDay = resultDay
 
+        val calendarInstance = Calendar.getInstance().apply {
+            set(Calendar.YEAR, customYear)
+            set(Calendar.MONTH, customMonth - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
+            set(Calendar.DAY_OF_MONTH, customDay!!)
+        }
+        var resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+    }
 
     val customYear = year
     val customMonth = month
@@ -267,9 +287,7 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
     LogDatePicker(
         state = openDialog.value,
         onDismiss = { openDialog.value = false },
-        onDateSelected = { selectedDateMillis ->
-            //resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(selectedDateMillis)
-        }
+        onDateSelected = onDateSelected
     )
 
 
@@ -958,7 +976,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
                             ) {
                                 //present?.let { Text(it) }
-                                Text("$resultTime ${resultDay}일")
+                                //Text("$resultTime ${resultDay}일")
                                 Image(
                                     modifier = Modifier
                                         .width(200.dp)
@@ -1035,6 +1053,7 @@ fun LogTextField(onTextState: (String) -> Unit){
             )
         },
         shape = RoundedCornerShape(16.dp),
+
 
 //        keyboardActions = KeyboardActions(
 //            onDone = {
