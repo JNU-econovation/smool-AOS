@@ -218,36 +218,29 @@ fun extractYearAndMonth(dateString: String): List<Int> {
 @Composable
 fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Boolean, onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit){
 
+    // 날짜 추출
     val yearAndMonth = extractYearAndMonth(resultTime.toString())
-
     val year = yearAndMonth[0]
     val month = yearAndMonth[1]
-    //val resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(date.value.time)
+    val day = resultDay
+
+    // 선택된 날짜로 설정
+    val calendarInstance = remember {
+        Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
+            set(Calendar.DAY_OF_MONTH, day!!)
+        }
+    }
+
+    // 날짜 포맷
+    var resultTime by remember { mutableStateOf(SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)) }
+
 
     val onDateSelected: (year: Int, month: Int, day: Int) -> Unit = { year, month, day ->
-        val customYear = year
-        val customMonth = month
-        val customDay = resultDay
 
-        val calendarInstance = Calendar.getInstance().apply {
-            set(Calendar.YEAR, customYear)
-            set(Calendar.MONTH, customMonth - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
-            set(Calendar.DAY_OF_MONTH, customDay!!)
-        }
         var resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
     }
-
-    val customYear = year
-    val customMonth = month
-    val customDay = resultDay
-
-    val calendarInstance = Calendar.getInstance().apply {
-        set(Calendar.YEAR, customYear)
-        set(Calendar.MONTH, customMonth - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
-        set(Calendar.DAY_OF_MONTH, customDay!!)
-    }
-    var resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
-    //var resultTime = remember { mutableStateOf(SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)) }
 
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf("수정") }
@@ -256,6 +249,13 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
     val calendarState = rememberSheetState()
 
     var openDialog = remember { mutableStateOf(false) }
+
+
+    // 날짜 업데이트
+    fun updateResultTime() {
+        resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+        Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
+    }
 
 
 
@@ -418,7 +418,8 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
 //                    newDate.add(Calendar.DATE, -1)
 //                    date.value = newDate
                     calendarInstance.add(Calendar.DATE, -1)
-                    resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+                    //resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+                    updateResultTime()
                     Log.d("ResultTimeDebug", "Updated resultTime minus: $resultTime")
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -449,7 +450,8 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
 //                    newDate.add(Calendar.DATE, +1)
 //                    date.value = newDate
                     calendarInstance.add(Calendar.DATE, +1)
-                    resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+                    //resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+                    updateResultTime()
                     Log.d("ResultTimeDebug", "Updated resultTime plus: $resultTime")
                 },
                 colors = ButtonDefaults.buttonColors(
