@@ -76,4 +76,27 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    implementation ("com.maxkeppeler.sheets-compose-dialogs:core:1.0.2")
+    implementation ("com.maxkeppeler.sheets-compose-dialogs:calendar:1.0.2")
+
+    implementation ("androidx.compose.material3:material3:1.2.0-alpha02")
+
+    implementation("com.patrykandpatrick.vico:compose:1.13.1")
+    implementation("com.patrykandpatrick.vico:compose-m3:1.13.1")
+    implementation("com.patrykandpatrick.vico:core:1.13.1")
+    implementation("com.patrykandpatrick.vico:views:1.13.1")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.5.0")
+    implementation ("com.squareup.retrofit2:adapter-rxjava:2.1.0")
+
+    implementation("com.squareup.okhttp3:okhttp-bom:4.10.0")
+    implementation ("com.squareup.okhttp3:okhttp")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation ("com.squareup.okhttp3:okhttp-urlconnection")
+//
+    implementation ("com.squareup.retrofit2:converter-scalars:2.5.0")
+    implementation ("com.squareup.retrofit2:adapter-rxjava:2.1.0")
+
 }
