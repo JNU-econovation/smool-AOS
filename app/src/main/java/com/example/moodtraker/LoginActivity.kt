@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -44,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,22 +63,94 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.example.moodtraker.RetrofitInstance.BASE_URL
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+import org.json.JSONObject
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import java.text.DateFormat
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent{
+
             LoginScreen()
         }
     }
 }
 
+data class Post(
+    val userId : String,
+    val password : String
+)
+
+data class BaseResponse(
+    val status : Int,
+    val message : String
+)
+
+data class LL(
+    val userPK :Int
+)
+
+object RetrofitInstance {
+    val BASE_URL = "http://192.168.0.251:8080"
+
+    
+    fun getInstance() : Retrofit {
+
+
+
+        return retrofit
+    }
+}
+val client: OkHttpClient = OkHttpClient.Builder()
+    .addInterceptor(HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    })
+    .build()
+
+val gson: Gson = GsonBuilder().serializeNulls().setDateFormat(DateFormat.LONG).create()
+
+val retrofit: Retrofit = Retrofit.Builder()
+    .baseUrl(BASE_URL)
+    .addConverterFactory(GsonConverterFactory.create(gson))
+    .client(client)
+    .build()
+
+
+
+
+interface MyApi {
+    @GET("/user/login")
+    suspend fun login() : Response<Post>
+
+    @POST("/user/login")
+    suspend fun login(@Body post: Post) : Response<Int>
+
+}
+
+val myApi: MyApi by lazy {
+    retrofit.create(MyApi::class.java)
+}
+
 
 @Composable
 fun LoginScreen(){
+
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -103,11 +177,13 @@ fun LoginScreen(){
                 modifier = Modifier
                     .zIndex(1f)
                     .width(300.dp)
-                    .offset(0.dp,(-30).dp)
+                    .offset(0.dp, (-30).dp)
 
             ) {
                 Image(
-                    modifier = Modifier.size(60.dp).align(Alignment.Center),
+                    modifier = Modifier
+                        .size(60.dp)
+                        .align(Alignment.Center),
                     painter = painterResource(id = R.drawable.personback),
                     contentDescription = "person"
                 )
@@ -159,7 +235,38 @@ fun LoginScreen(){
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Button(
-                        onClick = { checkCredentials(credentials, context) },
+                        onClick = {
+
+
+                            coroutineScope.launch {
+                                Log.d("로그인 클릭", "")
+                                val loginRequest =
+                                    Post(userId = credentials.id, password = credentials.pwd)
+
+
+
+
+                                try {
+                                    val response = myApi.login(loginRequest)
+                                    Log.d("로그인 LoginActivity", "${response.body()}")
+//                                    val Json = Gson().toJson(response.body())
+//                                    val data= JSONObject(Json.toString())
+//                                    val status = data.getInt("status")
+//                                    val message = data.getString("message")
+
+                                    Log.d("로그인 LoginActivity", "${response.body()}")
+                                        Log.d("로그인 성공", "")
+                                        checkCredentials(credentials, context)
+
+
+                                }catch (e:Exception){
+                                    Log.d("로그인 오류", "")
+                                }
+
+
+                            }
+
+                        },
                         enabled = credentials.isNotEmpty(),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.width(200.dp)
@@ -175,7 +282,7 @@ fun LoginScreen(){
 
 fun checkCredentials(creds: Credentials, context: Context) {
 
-    if(creds.isNotEmpty() && creds.id == "admin") {
+    if(creds.isNotEmpty() && creds.id == "abc123") {
         context.startActivity(Intent(context, MainActivity::class.java))
         (context as Activity).finish()
     } else {
@@ -298,7 +405,8 @@ fun PasswordField(
         trailingIcon = trailingIcon,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(
-            onDone = { focusManager.clearFocus(); submit() }
+            onDone = { focusManager.clearFocus();  }
+            //submit()
         ),
         placeholder = { Text(placeholder) },
         singleLine = true,
