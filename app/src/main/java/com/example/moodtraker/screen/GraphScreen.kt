@@ -103,13 +103,12 @@ fun GraphScreen(){
         }
 
         Column() {
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Icon(Icons.Default.HelpOutline, contentDescription = "help",tint = Color.White,
                 modifier = Modifier
                     .align(Alignment.End)
                     .padding(end = 16.dp))
             ChartHeader(time)
-            Spacer(modifier = Modifier.height(10.dp))
             //ComposedChart()
             testChart()
 
@@ -145,13 +144,13 @@ fun ChartHeader(date: MutableState<Calendar>){
         ) {
             Text(
                 text = "<",
-                fontSize = 30.sp
+                fontSize = 28.sp
             )
         }
 
         Text(
             text = resultTime,
-            fontSize = 28.sp,
+            fontSize = 24.sp,
             color = Color.White
         )
 
@@ -168,7 +167,7 @@ fun ChartHeader(date: MutableState<Calendar>){
             )) {
             Text(
                 text = ">",
-                fontSize = 30.sp
+                fontSize = 28.sp
             )
         }
     }
