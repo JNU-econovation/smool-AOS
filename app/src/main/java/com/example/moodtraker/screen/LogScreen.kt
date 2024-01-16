@@ -954,9 +954,10 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write; standby = !standby; if(content == null || content == "") count-- },
+                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write; standby = !standby;  },
                         onDoneClick = { standby = !standby; focusManager.clearFocus(); },
                         onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- })
+                    //if(content == null || content == "") count--
 
                     if (count == 0) {
                         Box(
@@ -994,7 +995,8 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
                         if (write == false) {   // 작성화면이 아닐때
 
-                            if (content != "") {
+                            if (content != "" || content != null) {
+                                Log.d("로그 content", "content: $content")
                                 LogDiary(content)
                             }
                         }
