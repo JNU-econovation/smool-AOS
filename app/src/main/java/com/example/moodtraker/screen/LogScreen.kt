@@ -735,7 +735,7 @@ fun emotionBox(){
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
-                    SleepSlider(initialValue = sleep) {emotion ->
+                    EmotionSlider(initialValue = sleep) {emotion ->
                         sleep = emotion
                     }
                 }
@@ -794,27 +794,27 @@ fun EmotionSlider(initialValue: Int, onEmotionChanged: (Int) -> Unit) {
     }
 }
 
-@Composable
-fun SleepSlider(initialValue: Int, onEmotionChanged: (Int) -> Unit) {
-    var sliderPosition by remember { mutableStateOf(initialValue.toFloat()) }
-
-    Column {
-        Slider(
-            value = sliderPosition.toFloat(),
-            onValueChange = { value ->
-                sliderPosition = value.roundToInt().toFloat()
-                onEmotionChanged(sliderPosition.roundToInt())
-            },
-            colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.secondary,
-                activeTrackColor = MaterialTheme.colorScheme.secondary,
-                inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer,
-            ),
-            steps = 12,
-            valueRange = 0f..12f
-        )
-    }
-}
+//@Composable
+//fun SleepSlider(initialValue: Int, onEmotionChanged: (Int) -> Unit) {
+//    var sliderPosition by remember { mutableStateOf(initialValue.toFloat()) }
+//
+//    Column {
+//        Slider(
+//            value = sliderPosition.toFloat(),
+//            onValueChange = { value ->
+//                sliderPosition = value.roundToInt().toFloat()
+//                onEmotionChanged(sliderPosition.roundToInt())
+//            },
+//            colors = SliderDefaults.colors(
+//                thumbColor = MaterialTheme.colorScheme.secondary,
+//                activeTrackColor = MaterialTheme.colorScheme.secondary,
+//                inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+//            ),
+//            steps = 12,
+//            valueRange = 0f..12f
+//        )
+//    }
+//}
 
 
 @Composable
