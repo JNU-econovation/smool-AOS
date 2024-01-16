@@ -146,9 +146,6 @@ fun LogDatePicker( state : Boolean, onDismiss : () -> Unit,  onDateSelected: (ye
 
         DatePickerDialog(
             onDismissRequest = {
-                // Dismiss the dialog when the user clicks outside the dialog or on the back
-                // button. If you want to disable that functionality, simply use an empty
-                // onDismissRequest.
                 onDismiss()
             },
             confirmButton = {
@@ -159,25 +156,13 @@ fun LogDatePicker( state : Boolean, onDismiss : () -> Unit,  onDateSelected: (ye
                             val calendar = Calendar.getInstance()
                             calendar.timeInMillis = selectedDateMillis
 
+                            // 선택한 날짜의 연, 월, 일을 얻음
                             onDateSelected(
                                 calendar.get(Calendar.YEAR),
                                 calendar.get(Calendar.MONTH) + 1,
                                 calendar.get(Calendar.DAY_OF_MONTH)
-//                                year = calendar.get(Calendar.YEAR),
-//                                month = calendar.get(Calendar.MONTH) + 1,
-//                                day = calendar.get(Calendar.DAY_OF_MONTH)
                             )
                         }
-//                        datePickerState.selectedDateMillis?.let { selectedDateMillis ->
-//                            onDateSelected(selectedDateMillis)
-//                            snackScope.launch {
-//                                snackState.showSnackbar("Selected date timestamp: $selectedDateMillis")
-//                            }
-//                        }
-
-                        //onDate()
-                        //var date = datePickerState.selectedDateMillis
-
                     },
                     enabled = confirmEnabled.value
                 ) {
@@ -236,11 +221,12 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
     // 날짜 포맷
     var resultTime by remember { mutableStateOf(SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)) }
 
-
-    val onDateSelected: (year: Int, month: Int, day: Int) -> Unit = { year, month, day ->
-
-        var resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+    // 날짜 업데이트
+    fun updateResultTime() {
+        resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+        Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
     }
+
 
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf("수정") }
@@ -249,13 +235,6 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
     val calendarState = rememberSheetState()
 
     var openDialog = remember { mutableStateOf(false) }
-
-
-    // 날짜 업데이트
-    fun updateResultTime() {
-        resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
-        Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
-    }
 
 
 
@@ -273,21 +252,23 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
 //    )
 
 
-
-//    LogDatePicker(openDialog.value){
-//        onDismiss = { openDialog.value = false }
-//        //resultTime = datePickerState.selectedDateMillis
-//        onDateSelected = { selectedDateMillis ->
-//            // 여기에서 선택된 날짜 처리를 하면 됩니다.
-//            resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(selectedDateMillis)
-//        }
-//    }
-
-
+    // 데이트 피커 세팅
     LogDatePicker(
         state = openDialog.value,
         onDismiss = { openDialog.value = false },
-        onDateSelected = onDateSelected
+        onDateSelected = { year, month, day ->
+
+            Log.d("datepicker", "$year-$month-$day")
+
+            calendarInstance.apply {
+                set(Calendar.YEAR, year)
+                set(Calendar.MONTH, month - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
+                set(Calendar.DAY_OF_MONTH, day!!)
+            }
+
+            updateResultTime()
+
+        }
     )
 
 
@@ -485,6 +466,7 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
 //    )
 //
 //}
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
