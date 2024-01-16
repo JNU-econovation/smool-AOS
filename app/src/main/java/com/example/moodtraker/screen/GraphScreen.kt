@@ -291,6 +291,7 @@ fun rememberChartStyle(columnChartColors: List<Color>): ChartStyle {
 fun testChart() {
 
     val maxYRange = 10
+
     val colorList = listOf(Color(0xFF3E3B79), Color(0xFFE16F6F), Color(0xFFB3F4FD), Color(0xFFF8FA93), Color(0xFF97F98F))
 
 
