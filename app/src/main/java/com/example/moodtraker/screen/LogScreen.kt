@@ -988,15 +988,18 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                     }
                     else {
 
+                        // 작성화면 여부와 관계없이 count 값이 1 이상이면 emotionBox()는 동일
+                        emotionBox()
+
                         if (write == false) {   // 작성화면이 아닐때
-                            emotionBox()
+
                             if (content != "") {
                                 LogDiary(content)
                             }
                         }
 
                         else {  // 작성화면일때
-                            emotionBox()
+
                             if (keyboardController != null) {
                                 if(standby == false) {
                                     LogTextField() { updatedTextState ->
