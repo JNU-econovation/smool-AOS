@@ -291,7 +291,7 @@ fun rememberChartStyle(columnChartColors: List<Color>): ChartStyle {
 fun testChart() {
 
     val maxYRange = 10
-    val colorList = listOf(Color(0xFF5A5788), Color(0xFFE16F6F), Color(0xFFB3F4FD), Color(0xFFF8FA93), Color(0xFF97F98F))
+    val colorList = listOf(Color(0xFF3E3B79), Color(0xFFE16F6F), Color(0xFFB3F4FD), Color(0xFFF8FA93), Color(0xFF97F98F))
 
 
     ProvideChartStyle(rememberChartStyle(listOf(Color.White))) {
@@ -341,7 +341,6 @@ fun testChart() {
             chartModelProducer = composedChartEntryModelProducer,
             startAxis = rememberStartAxis(
                 itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = maxYRange / 10 + 1)
-                //itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = 0)
             ),
 //            endAxis = rememberEndAxis(
 //                //itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = maxYRange / 10 + 1)
@@ -375,7 +374,9 @@ fun rememberLegend(colors: List<Color>): HorizontalLegend {
                     shape = Shapes.pillShape,
                     color = colors[index]
                 ),
-                label = textComponent(),
+                label = textComponent {
+                    color = android.graphics.Color.WHITE
+                },
                 labelText = labelTextList[index]
             )
         },
