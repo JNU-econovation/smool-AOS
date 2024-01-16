@@ -954,7 +954,8 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write; standby = !standby }, onDoneClick = { standby = !standby; focusManager.clearFocus() },
+                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write; standby = !standby; if(content == null || content == "") count-- },
+                        onDoneClick = { standby = !standby; focusManager.clearFocus(); },
                         onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- })
 
                     if (count == 0) {
