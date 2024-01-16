@@ -109,7 +109,8 @@ fun GraphScreen(){
                     .padding(end = 16.dp))
             ChartHeader(time)
             Spacer(modifier = Modifier.height(10.dp))
-            ComposedChart()
+            //ComposedChart()
+            testChart()
 
         }
 
@@ -204,6 +205,7 @@ fun ChartHeader(date: MutableState<Calendar>){
 @Composable
 fun ComposedChart() {
 
+
     val composedChartEntryModelProducer = ComposedChartEntryModelProducer.build {
         add(entriesOf(9, 10, 1, 2, 3, 4, 5, 6, 2, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 10))
         add(entriesOf(10, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 12, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 10, 6))
@@ -234,7 +236,7 @@ fun ComposedChart() {
 
 
     Chart(
-        //chart = remember(sleepChart, happyChart) { sleepChart + happyChart },
+
         chart = composedChart,
         chartModelProducer = composedChartEntryModelProducer,
         startAxis = rememberStartAxis(),
@@ -244,11 +246,140 @@ fun ComposedChart() {
 
     )
 
-
-
     Log.d("ComposedChart", "Sleep Chart Data: ${composedChartEntryModelProducer.getModel()}")
 
+}
 
+
+
+//--------------------------
+
+@Composable
+fun rememberChartStyle(columnChartColors: List<Color>): ChartStyle {
+
+    val columnChartColors = listOf(Color.White)
+
+    return ChartStyle(
+        axis = ChartStyle.Axis(
+            axisLabelColor = Color.White,
+            axisGuidelineColor = Color.Gray,
+            axisLineColor = Color.White
+        ),
+        columnChart = ChartStyle.ColumnChart(
+            columns = columnChartColors.map { columnColor ->
+                LineComponent(
+                    color = columnColor.toArgb(),
+                    thicknessDp = 25f,
+                    shape = Shapes.cutCornerShape(topRightPercent = 20, topLeftPercent = 20)
+                )
+            },
+            dataLabel = TextComponent.Builder().build()
+        ),
+        lineChart = ChartStyle.LineChart(lines = emptyList()),
+        marker = ChartStyle.Marker(),
+        elevationOverlayColor = Color.White
+    )
+
+}
+
+@Composable
+fun testChart() {
+
+    val maxYRange = 12
+    val colorList = listOf(Color.White, Color(0xFFE16F6F), Color(0xFFB3F4FD), Color(0xFFF8FA93), Color(0xFF97F98F))
+
+
+    ProvideChartStyle(rememberChartStyle(listOf(Color.White))) {
+
+        val composedChartEntryModelProducer = ComposedChartEntryModelProducer.build {
+            add(entriesOf(9, 12, 1, 2, 3, 4, 5, 6, 2, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 10))
+            add(entriesOf(10, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 12, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 10, 6))
+            add(entriesOf(1, 2, 3, 4 ,5 , 6, 7, 8, 9))
+            add(entriesOf(5, 0, 10, 7, 2, 3, 7, 3, 4, 4, 4, 4, 4, 5))
+            add(entriesOf(5, 5, 5, 5, 5, 5, 5 ,5 ,5, 5, 10, 10, 10, 10))
+
+        }
+
+
+        var sleepChart = columnChart(
+            mergeMode = ColumnChart.MergeMode.Grouped,
+            axisValuesOverrider = AxisValuesOverrider.fixed(
+                minY = 0f,
+                maxY = maxYRange.toFloat()
+            ),
+            spacing = 30.dp
+        )
+        var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFE16F6F)))) // 핑크
+        var gloomChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB3F4FD)))) // 하늘
+        var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFF8FA93)))) // 노랑
+        var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFF97F98F)))) // 초록
+
+        //val composedChart = remember(sleepChart, happyChart, gloomChart, anxietyChart, stressChart) { sleepChart + happyChart + gloomChart + anxietyChart + stressChart }
+        val composedChart = remember(
+            sleepChart,
+            happyChart,
+            gloomChart,
+            anxietyChart,
+            stressChart
+        ) {
+            sleepChart + happyChart + gloomChart + anxietyChart + stressChart
+        }
+
+
+        Chart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .padding(horizontal = 15.dp, vertical = 5.dp),
+            chart = composedChart,
+            legend = rememberLegend(colors = colorList),
+            chartModelProducer = composedChartEntryModelProducer,
+            startAxis = rememberStartAxis(
+                itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = maxYRange / 10 + 1)
+            ),
+            bottomAxis = rememberBottomAxis(
+                valueFormatter = { value, _ ->
+                    ("${value.toInt()+1}일")
+                }
+            ),
+            runInitialAnimation = true,
+            chartScrollState = rememberChartScrollState()
+        )
+    }
+}
+
+@Composable
+fun rememberLegend(colors: List<Color>): HorizontalLegend {
+    val labelTextList = listOf("수면시간", "행복", "우울", "불안", "스트레스")
+
+    return horizontalLegend(
+        items = List(labelTextList.size) { index ->
+            legendItem(
+                icon = shapeComponent(
+                    shape = Shapes.pillShape,
+                    color = colors[index]
+                ),
+                label = textComponent(),
+                labelText = labelTextList[index]
+            )
+        },
+        iconSize = 10.dp,
+        iconPadding = 8.dp,
+        spacing = 10.dp,
+        padding = dimensionsOf(top = 8.dp)
+    )
+}
+
+
+private fun intListAsFloatEntryList(list: List<Int>): List<FloatEntry> {
+    val floatEntryList = arrayListOf<FloatEntry>()
+    floatEntryList.clear()
+
+    list.forEachIndexed { index, item ->
+        floatEntryList.add(entryOf(x = index.toFloat(), y = item.toFloat()))
+    }
+
+    return floatEntryList
 }
 
 
