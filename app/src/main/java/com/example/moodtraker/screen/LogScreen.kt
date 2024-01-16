@@ -312,7 +312,7 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
             if (standby == false) {
                 IconButton(onClick = {
                     onDoneClick()
-                    Log.d("doneClick", "$standby")
+                    Log.d("doneClick", "standby: $standby")
                 }) {
                     Icon(Icons.Default.Done, contentDescription = "Done", tint = Color.White)
                 }
@@ -321,7 +321,7 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
                 IconButton(onClick = {
                     expanded = true
                     onMenuClick()
-                    Log.d("menuClick", "$standby")
+                    Log.d("menuClick", "standby: $standby")
                 }) {
                     Icon(Icons.Default.MoreVert, contentDescription = "Menu", tint = Color.White)
                 }
@@ -923,7 +923,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 LogFloatingActionButton(count) {
                     write = !write   // 클릭 후에 버튼을 숨김
                     count++
-                    Log.d("floatingActionButtonClick", "$count")
+                    Log.d("floatingActionButtonClick", "count: $count")
                 }
             }
 
@@ -954,7 +954,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write;  }, onDoneClick = { standby = !standby; focusManager.clearFocus() },
+                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write; standby = !standby }, onDoneClick = { standby = !standby; focusManager.clearFocus() },
                         onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- })
 
                     if (count == 0) {
@@ -1001,10 +1001,14 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                         else {  // 작성화면일때
 
                             if (keyboardController != null) {
+                                Log.d("click", "standby: $standby")
                                 if(standby == false) {
-                                    LogTextField() { updatedTextState ->
-                                        content = updatedTextState
-                                    }
+                                    LogTextField(
+                                        onTextState = {updatedTextState ->
+                                            content = updatedTextState
+                                        },
+
+                                    )
                                 }
                                 else {
                                     LogStandby(content)
@@ -1098,8 +1102,10 @@ fun LogTextField(onTextState: (String) -> Unit){
 
         //interactionSource = remember { MutableInteractionSource() },
 
-
     )
+
+
+
     Button(
         onClick = {
             enteredText = textState
