@@ -185,7 +185,6 @@ fun LogDatePicker( state : Boolean, onDismiss : () -> Unit,  onDateSelected: (ye
 }
 
 
-//date: MutableState<Calendar>
 
 fun extractYearAndMonth(dateString: String): List<Int> {
     val pattern = SimpleDateFormat("yyyy년 MM월", Locale.KOREA)
@@ -201,7 +200,8 @@ fun extractYearAndMonth(dateString: String): List<Int> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Boolean, onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit){
+fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Boolean,
+              onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit, onModify: () -> Unit, onDelete: () -> Unit){
 
     // 날짜 추출
     val yearAndMonth = extractYearAndMonth(resultTime.toString())
@@ -312,6 +312,7 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
             if (standby == false) {
                 IconButton(onClick = {
                     onDoneClick()
+                    Log.d("doneClick", "$standby")
                 }) {
                     Icon(Icons.Default.Done, contentDescription = "Done", tint = Color.White)
                 }
@@ -320,6 +321,7 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
                 IconButton(onClick = {
                     expanded = true
                     onMenuClick()
+                    Log.d("menuClick", "$standby")
                 }) {
                     Icon(Icons.Default.MoreVert, contentDescription = "Menu", tint = Color.White)
                 }
@@ -339,6 +341,8 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
                         onClick = {
                             //counter++
                             expanded = false
+                            onModify()
+
                         },
 //                        modifier = Modifier.border(
 //                            border = BorderStroke(1.dp, Color.White),
@@ -354,6 +358,7 @@ fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Bool
                             //counter++
                             expanded = false
                             deleteDialog = true
+                            onDelete()
                         },
 //                        modifier = Modifier.border(
 //                            border = BorderStroke(1.dp, Color.White),
@@ -918,6 +923,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 LogFloatingActionButton(count) {
                     write = !write   // 클릭 후에 버튼을 숨김
                     count++
+                    Log.d("floatingActionButtonClick", "$count")
                 }
             }
 
@@ -948,7 +954,8 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write;  }, onDoneClick = { standby = !standby; focusManager.clearFocus() }, onMenuClick = {  })
+                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write;  }, onDoneClick = { standby = !standby; focusManager.clearFocus() },
+                        onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- })
 
                     if (count == 0) {
                         Box(
@@ -991,8 +998,13 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                         else {  // 작성화면일때
                             emotionBox()
                             if (keyboardController != null) {
-                                LogTextField() { updatedTextState ->
-                                    content = updatedTextState
+                                if(standby == false) {
+                                    LogTextField() { updatedTextState ->
+                                        content = updatedTextState
+                                    }
+                                }
+                                else {
+                                    LogStandby(content)
                                 }
                             }
 
@@ -1007,6 +1019,32 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
         }
 
+
+    }
+}
+
+@Composable
+fun LogStandby(content: String) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp)
+//                    .background(
+//                        color = Color.Transparent,
+//                        shape = RoundedCornerShape(8.dp)
+//                    )
+//        .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
+        //.clickable { onToggle() }
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "${content}",
+                color = Color.White
+            )
+
+
+        }
 
     }
 }
