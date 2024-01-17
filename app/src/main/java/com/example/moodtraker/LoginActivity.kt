@@ -117,9 +117,6 @@ data class UserPK(
     val userPK : Int
 )
 
-data class LL(
-    val userPK :Int
-)
 
 object RetrofitInstance {
     val BASE_URL = "http://192.168.0.251:8080"
@@ -270,14 +267,26 @@ fun LoginScreen(){
                                 try {
                                     val response = myApi.login(loginRequest)
                                     Log.d("로그인 LoginActivity", "${response.body()}")
-                                    val Json = Gson().toJson(response.body())
-                                    val data = JSONObject(Json.toString())
-                                    val status = data.getInt("status")
-                                    val message = data.getString("message")
+
+                                    val json = JSONObject(response.body().toString())
+                                    val status = json.getInt("status")
+                                    val message = json.getString("message")
+                                    val data = json.getJSONObject("data")
+                                    val userPk = data.getInt("userPK")
+
+
+//                                    멘토링 코드
+//                                    val Json = Gson().toJson(response.body())
+//                                    val data = JSONObject(Json.toString())
+//                                    val status = data.getInt("status")
+//                                    val message = data.getString("message")
+
 
                                     Log.d("로그인 LoginActivity", "${response.body()}")
-                                        Log.d("로그인 성공", "")
-                                        checkCredentials(credentials, context)
+                                    Log.d("로그인 성공", "$status $message, userPk: $userPk")
+                                    checkCredentials(credentials, context)
+
+
 
 
                                 }catch (e:Exception){
@@ -431,8 +440,7 @@ fun SignupScreen(){
 //                                    val message = data.getString("message")
 
                                     Log.d("회원가입 LoginActivity", "${response.body()}")
-                                    Log.d("회원가입 성공", "")
-                                    Log.d("회원가입", "$status $message, userPk: $userPk")
+                                    Log.d("회원가입 성공", "$status $message, userPk: $userPk")
                                     checkCredentials(credentials, context)
 
 
