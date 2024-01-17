@@ -107,6 +107,16 @@ data class BaseResponse(
     val message : String
 )
 
+data class UserResponse(
+    val status : Int,
+    val message : String,
+    val data : UserPK
+)
+
+data class UserPK(
+    val userPK : Int
+)
+
 data class LL(
     val userPK :Int
 )
@@ -140,11 +150,19 @@ val retrofit: Retrofit = Retrofit.Builder()
 
 
 interface MyApi {
-    @GET("/user/login")
-    suspend fun login() : Response<Post>
 
+    // 회원가입
+    @POST("/user/join")
+    suspend fun join(@Body post: Post) : Response<UserResponse>
+
+    // 로그인
     @POST("/user/login")
     suspend fun login(@Body post: Post) : Response<Int>
+
+    // 로그아웃
+    @POST("/user/logout")
+    suspend fun logout() : Response<BaseResponse>
+    
 
 }
 
@@ -249,16 +267,13 @@ fun LoginScreen(){
                                 val loginRequest =
                                     Post(userId = credentials.id, password = credentials.pwd)
 
-
-
-
                                 try {
                                     val response = myApi.login(loginRequest)
                                     Log.d("로그인 LoginActivity", "${response.body()}")
-//                                    val Json = Gson().toJson(response.body())
-//                                    val data= JSONObject(Json.toString())
-//                                    val status = data.getInt("status")
-//                                    val message = data.getString("message")
+                                    val Json = Gson().toJson(response.body())
+                                    val data = JSONObject(Json.toString())
+                                    val status = data.getInt("status")
+                                    val message = data.getString("message")
 
                                     Log.d("로그인 LoginActivity", "${response.body()}")
                                         Log.d("로그인 성공", "")
@@ -387,27 +402,43 @@ fun SignupScreen(){
 
                             coroutineScope.launch {
                                 Log.d("회원가입 클릭", "")
-                                val loginRequest =
+                                val joinRequest =
                                     Post(userId = credentials.id, password = credentials.pwd)
 
-
-
-
                                 try {
-//                                    val response = myApi.login(loginRequest)
-//                                    Log.d("로그인 LoginActivity", "${response.body()}")
+                                    val response = myApi.join(joinRequest)
+                                    Log.d("회원가입 LoginActivity", "${response.body()}")
+
+                                    val json = JSONObject(response.body().toString())
+                                    val status = json.getInt("status")
+                                    val message = json.getString("message")
+                                    val data = json.getJSONObject("data")
+                                    val userPk = data.getInt("userPk")
+
+
 //                                    val Json = Gson().toJson(response.body())
-//                                    val data= JSONObject(Json.toString())
+//                                    val json = JSONObject(Json.toString())
+//                                    val status = json.getInt("status")
+//                                    val message = json.getString("message")
+//                                    val data = json.getJSONObject("data")
+//                                    val userPK = data.getInt("userPK")
+
+
+//                                    멘토링 코드
+//                                    val Json = Gson().toJson(response.body())
+//                                    val data = JSONObject(Json.toString())
 //                                    val status = data.getInt("status")
 //                                    val message = data.getString("message")
 
-//                                    Log.d("회원가입 LoginActivity", "${response.body()}")
-//                                    Log.d("회원가입 성공", "")
-//                                    checkCredentials(credentials, context)
+                                    Log.d("회원가입 LoginActivity", "${response.body()}")
+                                    Log.d("회원가입 성공", "")
+                                    Log.d("회원가입", "$status $message, userPk: $userPk")
+                                    checkCredentials(credentials, context)
 
 
                                 }catch (e:Exception){
-                                    Log.d("로그인 오류", "")
+                                    Log.d("회원가입 오류", "")
+
                                 }
 
 
@@ -427,6 +458,34 @@ fun SignupScreen(){
     }
 }
 
+
+// 로그아웃 버튼 클릭시
+//coroutineScope.launch {
+//    Log.d("회원가입 클릭", "")
+////                                val loginRequest =
+////                                    Post(userId = credentials.id, password = credentials.pwd)
+//
+//    try {
+//        val response = myApi.logout()
+//        Log.d("회원가입 LoginActivity", "${response.body()}")
+//        val Json = Gson().toJson(response.body())
+//        val data = JSONObject(Json.toString())
+//        val status = data.getInt("status")
+//        val message = data.getString("message")
+//
+//        Log.d("회원가입 LoginActivity", "${response.body()}")
+//        Log.d("회원가입 성공", "")
+//        Log.d("회원가입", "$status $message")
+//        checkCredentials(credentials, context)
+//
+//
+//    }catch (e:Exception){
+//        Log.d("회원가입 오류", "")
+//        Log.d("$status", "")
+//    }
+//
+//
+//}
 
 
 
