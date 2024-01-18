@@ -14,8 +14,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,18 +44,25 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.moodtraker.MyApi
+import com.example.moodtraker.RetrofitInstance
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+
 @Composable
 fun CalendarScreen() {
+
 
     LogNav(navHostController = rememberNavController())
 
 }
 
+
+//val retrofit = RetrofitInstance.getInstance()
+//val myApi = RetrofitInstance.getInstance().create(MyApi::class.java)
 
 @Composable
 fun LogNav(navHostController: NavHostController) {
@@ -84,9 +97,16 @@ fun CalendarContent(navHostController: NavHostController) {
     val time = remember {
         mutableStateOf(calendarInstance)
     }
-    val resultTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(time.value.time)
 
-    var recentDay by remember { mutableStateOf("") }
+    val todayInstance = Calendar.getInstance()
+    val today = remember {
+        mutableStateOf(todayInstance)
+    }
+
+
+//    val resultTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(time.value.time)
+//
+//    var recentDay by remember { mutableStateOf("") }
 
 
 
@@ -125,6 +145,7 @@ fun CalendarContent(navHostController: NavHostController) {
 
                 CalendarContents(
                     date = time,
+                    today = today,
                     navController = navHostController
                 )
             }
@@ -137,12 +158,15 @@ fun CalendarContent(navHostController: NavHostController) {
 @Composable
 fun CalendarContents(
     date: MutableState<Calendar>,
+    today: MutableState<Calendar>,
     navController: NavHostController,
 ) {
 
     // 캘린더 헤더
 
     var resultTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(date.value.time)
+    val todayDate = SimpleDateFormat("dd", Locale.KOREA).format(today.value.time).toInt()
+    val todayTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(today.value.time)
 
 
     Row(
@@ -229,7 +253,7 @@ fun CalendarContents(
     val monthFirstDay = date.value.get(Calendar.DAY_OF_WEEK) - 1    // 1일이 무슨 요일부터인지
     val monthWeeksCount = (monthDayMax + monthFirstDay + 6) / 7     // 현재 달의 week 수
 
-    var count by remember { mutableStateOf(0) }
+    var exist by remember { mutableStateOf(false) }
 
     Log.d("monthDayMax", monthDayMax.toString())
     Log.d("monthFirstDay", monthFirstDay.toString())
@@ -250,21 +274,36 @@ fun CalendarContents(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(80.dp)
-                                .padding(10.dp)
+                                //.padding(10.dp)
                                 .clickable {
                                     // 로그 페이지로 이동
                                     navController.navigate("LogScreen/$resultTime/$resultDay") {
-//                                        putString("resultTime", resultTime)
-//                                        putInt("resultDay", resultDay)
                                     }
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = resultDay.toString(),
-                                fontSize = 20.sp,
-                                color = Color.White,
-                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp)
+                                    .background(
+                                        shape = CircleShape,
+                                        color = if(todayDate == resultDay && todayTime == resultTime) Color(0xFF504D7E) else Color.Transparent
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = resultDay.toString(),
+                                    fontSize = 20.sp,
+                                    color = Color.White,
+                                )
+                            }
+
+                            if (exist == true) {
+                                Icon(Icons.Default.Circle, contentDescription = "circle", tint = Color.White, modifier = Modifier.size(20.dp))
+                            }
+
                         }
 
                     } else {
