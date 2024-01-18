@@ -1160,15 +1160,9 @@ fun LogFloatingActionButton(count: Int, onClick: () -> Unit) {
     FloatingActionButton(
         onClick = {
             onClick()   // 클릭 후에 write 상태 변경
-
-
-            if (count == 0) {
-
-            }
-            else {
-
-            }
-        }
+        },
+        containerColor = Color(0xFF5A5788),
+        contentColor = Color.White
     ) {
         Icon(Icons.Default.Edit, contentDescription = "Edit")
     }
