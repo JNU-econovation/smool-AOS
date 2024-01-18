@@ -283,25 +283,33 @@ fun CalendarContents(
                             contentAlignment = Alignment.Center
                         ) {
 
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp)
-                                    .background(
-                                        shape = CircleShape,
-                                        color = if(todayDate == resultDay && todayTime == resultTime) Color(0xFF504D7E) else Color.Transparent
-                                    ),
-                                contentAlignment = Alignment.Center
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(
-                                    text = resultDay.toString(),
-                                    fontSize = 20.sp,
-                                    color = Color.White,
-                                )
-                            }
 
-                            if (exist == true) {
-                                Icon(Icons.Default.Circle, contentDescription = "circle", tint = Color.White, modifier = Modifier.size(20.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(50.dp)
+                                        .background(
+                                            shape = CircleShape,
+                                            color = if (todayDate == resultDay && todayTime == resultTime) Color(
+                                                0xFF504D7E
+                                            ) else Color.Transparent
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = resultDay.toString(),
+                                        fontSize = 20.sp,
+                                        color = Color.White,
+                                    )
+                                }
+
+                                if (exist == true) {
+                                    Icon(Icons.Default.Circle, contentDescription = "circle", tint = Color.White, modifier = Modifier.size(10.dp))
+                                }
+
                             }
 
                         }
