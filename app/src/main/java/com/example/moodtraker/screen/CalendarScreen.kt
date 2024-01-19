@@ -1,7 +1,5 @@
 package com.example.moodtraker.screen
 
-import android.provider.Settings.Global.putInt
-import android.provider.Settings.Global.putString
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -29,6 +26,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,9 +42,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+//import com.example.moodtraker.CalendarRequest
+import com.example.moodtraker.LoginActivity
 import com.example.moodtraker.MyApi
 import com.example.moodtraker.RetrofitInstance
+import com.example.moodtraker.UserPK
+//import com.example.moodtraker.UserPkSet
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
+import com.example.moodtraker.user
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -61,8 +66,10 @@ fun CalendarScreen() {
 }
 
 
-//val retrofit = RetrofitInstance.getInstance()
-//val myApi = RetrofitInstance.getInstance().create(MyApi::class.java)
+val retrofit = RetrofitInstance.getInstance()
+val myApi = RetrofitInstance.getInstance().create(MyApi::class.java)
+
+
 
 @Composable
 fun LogNav(navHostController: NavHostController) {
@@ -143,6 +150,7 @@ fun CalendarContent(navHostController: NavHostController) {
 //                CalendarDayName()
 //                CalendarDayList(time, navHostController)
 
+
                 CalendarContents(
                     date = time,
                     today = today,
@@ -162,11 +170,100 @@ fun CalendarContents(
     navController: NavHostController,
 ) {
 
-    // 캘린더 헤더
 
+    val coroutineScope = rememberCoroutineScope()
+
+    val loginActivityInstance = LoginActivity()
+    val userPk = user.userPk
+    Log.d("캘린더 로그인 userPk", "userPk: $userPk")
+
+
+    // 데이터 세팅
     var resultTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(date.value.time)
     val todayDate = SimpleDateFormat("dd", Locale.KOREA).format(today.value.time).toInt()
     val todayTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(today.value.time)
+
+    Log.d("캘린더", "resultTime: $resultTime")
+
+    fun updateCalendar() {
+        var resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
+        Log.d("캘린더 업데이트", "resultLog: $resultLog")
+
+        coroutineScope.launch {
+            Log.d("캘린더 클릭", "")
+            val calendarRequest =
+                UserPK(userPk = userPk)
+
+            try {
+
+                Log.d("캘린더 1111", "1111")   // 백엔드가 코드 바꿔줘야 함. response에서 형태 막힘
+                val response = myApi.calendar(resultLog, calendarRequest)
+                Log.d("캘린더 response.body", "${response.body()}")
+                Log.d("로그인 응답 코드", "HTTP status code: ${response.code()}")
+                Log.d("로그인 응답 성공 여부", "Is successful: ${response.isSuccessful}")
+
+                val json = JSONObject(response.body().toString())
+                val status = json.getInt("status")
+                val message = json.getString("message")
+                val data = json.getJSONObject("data")
+                val existDates = data.getJSONArray("existDates")
+
+                Log.d("캘린더 데이터", "$status $message $data $existDates")
+
+                for (i in 0 until existDates.length()) {
+                    val dateExist = existDates.getJSONObject(i)
+                    val localDate = dateExist.getString("localDate")
+                    val exist = dateExist.getBoolean("exist")
+
+                    Log.d("캘린더 상세 데이터", "$localDate $exist")
+                }
+
+
+            }catch (e:Exception){
+                Log.d("캘린더 오류", "$e")
+            }
+
+
+        }
+
+
+    }
+
+
+
+
+//---------
+
+//    val yearAndMonth = extractYearAndMonth(resultTime.toString())
+//    val year = yearAndMonth[0]
+//    val month = yearAndMonth[1]
+//    //val day = resultDay
+//
+//
+//    val calendarInstanceLast = remember {
+//        Calendar.getInstance().apply {
+//            set(Calendar.YEAR, year)
+//            set(Calendar.MONTH, month - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
+//            val lastDayOfMonth = getActualMaximum(Calendar.DAY_OF_MONTH)
+//            set(Calendar.DAY_OF_MONTH, lastDayOfMonth)
+//            //set(Calendar.DAY_OF_MONTH, day!!)
+//        }
+//    }
+//
+//    // 날짜 포맷
+//    var resultTimeLast by remember { mutableStateOf(SimpleDateFormat("yyyy-MM-dd", Locale.KOREA).format(calendarInstanceLast.time)) }
+//    Log.d("캘린더", "해당 월 마지막 일: $resultTimeLast")
+//
+//    fun updateResultTime() {
+//        resultTimeLast = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA).format(calendarInstanceLast.time)
+//        Log.d("ResultTimeLast", "Updated resultTimeLast: $resultTimeLast")
+//    }
+
+
+
+
+
+    // 캘린더 헤더
 
 
     Row(
@@ -183,6 +280,7 @@ fun CalendarContents(
                 newDate.time = date.value.time
                 newDate.add(Calendar.MONTH, -1)
                 date.value = newDate
+                updateCalendar()
 
             },
             colors = ButtonDefaults.buttonColors(
@@ -209,6 +307,7 @@ fun CalendarContents(
                 newDate.time = date.value.time
                 newDate.add(Calendar.MONTH, +1)
                 date.value = newDate
+                updateCalendar()
 
             },
             colors = ButtonDefaults.buttonColors(

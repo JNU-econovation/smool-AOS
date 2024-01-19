@@ -75,9 +75,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 import java.text.DateFormat
 
 class LoginActivity : ComponentActivity() {
@@ -121,11 +121,6 @@ data class UserPK(
 
 
 // 캘린더
-
-data class CalendarRequest(
-    val dates : Int,
-    val userPk : Int
-)
 
 data class CalendarResponse(
     val status : Int,
@@ -219,11 +214,11 @@ interface MyApi {
     suspend fun logout() : Response<BaseResponse>
 
     // 캘린더 화면 표시
-//    @GET("/calendar/{dates}")
-//    suspend fun calendar(
-//        @Path("dates") dates: Int,
-//        @Query userPk: UserPK
-//    ) : Response<CalendarResponse>
+    @GET("/calendar/{dates}")
+    suspend fun calendar(
+        @Path("dates") dates: String,
+        @Body userPk: UserPK
+    ) : Response<CalendarResponse>
 
     
 
