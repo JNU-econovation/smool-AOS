@@ -55,7 +55,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -71,13 +70,11 @@ import com.google.gson.GsonBuilder
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import org.json.JSONObject
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -89,8 +86,8 @@ class LoginActivity : ComponentActivity() {
 
         setContent{
 
-            LoginScreen()
-            //SignupScreen()
+            //LoginScreen()
+            SignupScreen()
         }
     }
 }
@@ -98,6 +95,12 @@ class LoginActivity : ComponentActivity() {
 data class Post(
     val userId : String,
     val password : String
+)
+
+data class JoinPost(
+    val userId : String,
+    val password : String,
+    val checkPassword : String
 )
 
 data class BaseResponse(
@@ -114,6 +117,7 @@ data class UserResponse(
 data class UserPK(
     val userPk : Int
 )
+
 
 
 // 캘린더
@@ -185,9 +189,14 @@ val retrofit: Retrofit = Retrofit.Builder()
 
 interface MyApi {
 
+    // 회원가입 에러
+    @POST("/user/join")
+    suspend fun joinError(@Body post: JoinPost) : Response<BaseResponse>
+
+
     // 회원가입
     @POST("/user/join")
-    suspend fun join(@Body post: Post) : Response<UserResponse>
+    suspend fun join(@Body post: JoinPost) : Response<UserResponse>
 
     // 로그인
     @POST("/user/login")
@@ -390,7 +399,7 @@ fun SignupScreen(){
         contentAlignment = Alignment.Center
     ) {
 
-        var credentials by remember { mutableStateOf(Credentials()) }
+        var credentialJoin by remember { mutableStateOf(CredentialJoin()) }
         var context = LocalContext.current
         var exPwd = ""
 
@@ -431,20 +440,22 @@ fun SignupScreen(){
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     LoginField(
-                        value = credentials.id,
-                        onChange = { data -> credentials = credentials.copy(id = data) }
+                        value = credentialJoin.id,
+                        onChange = { data -> credentialJoin = credentialJoin.copy(id = data) }
                     )
                     PasswordField(
-                        value = credentials.pwd,
-                        onChange = { data -> credentials = credentials.copy(pwd = data) },
-                        submit = { checkCredentials(credentials, context) }
+                        value = credentialJoin.pwd,
+                        onChange = { data -> credentialJoin = credentialJoin.copy(pwd = data) },
+                        submit = {  }
                     )
+                    //checkCredentials(credentialJoin, context)
                     PasswordCheckField(
-                        value = exPwd,
-                        onChange = { data -> exPwd = data },
+                        value = credentialJoin.pwdck,
+                        onChange = { data -> credentialJoin = credentialJoin.copy(pwdck = data) },
                         submit = {
-                            if (exPwd != credentials.pwd)
-                                Toast.makeText(context, "비밀번호가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
+//                            if (credentialJoin.pwd != credentialJoin.pwdck)
+//                                Toast.makeText(context, "비밀번호가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
+                            //checkCredentialJoin(credentialJoin, context)
                         }
                     )
 
@@ -472,17 +483,61 @@ fun SignupScreen(){
                             coroutineScope.launch {
                                 Log.d("회원가입 클릭", "")
                                 val joinRequest =
-                                    Post(userId = credentials.id, password = credentials.pwd)
+                                    JoinPost(userId = credentialJoin.id, password = credentialJoin.pwd, checkPassword = credentialJoin.pwdck)
+
+
 
                                 try {
+
+                                    Log.d("회원가입 111111", "111111")
+
                                     val response = myApi.join(joinRequest)
                                     Log.d("회원가입 LoginActivity", "${response.body()}")
+                                    Log.d("회원가입 응답 코드", "HTTP status code: ${response.code()}")
+                                    Log.d("회원가입 응답 성공 여부", "Is successful: ${response.isSuccessful}")
 
-                                    val json = JSONObject(response.body().toString())
-                                    val status = json.getInt("status")
-                                    val message = json.getString("message")
-                                    val data = json.getJSONObject("data")
-                                    val userPk = data.getInt("userPk")
+                                    if (response.isSuccessful) {
+                                        // 응답이 성공적일 때
+
+                                        val userResponse = response.body()
+                                        if(userResponse != null) {
+                                            val status = userResponse.status
+                                            val message = userResponse.message
+                                            val userPk = userResponse.data.userPk
+
+                                            Log.d("회원가입 LoginActivity", "${response.body()}")
+                                            Log.d("회원가입 성공", "$status $message, userPk: $userPk")
+
+                                            context.startActivity(Intent(context, MainActivity::class.java))
+                                            (context as Activity).finish()
+
+                                            //checkCredentialJoin(credentialJoin, context)
+                                        } else {
+                                            Log.d("회원가입 오류", "Response body is null")
+                                        }
+
+                                    } else {
+                                        // 응답이 실패했을 때
+
+                                        val errorMessage = response.errorBody()?.string()
+                                        Log.d("회원가입 오류 메시지", "Error message: $errorMessage")
+                                        val jsonObject = JSONObject(errorMessage)
+                                        val status = jsonObject.getInt("status")
+                                        val message = jsonObject.getString("message")
+                                        Log.d("회원가입 오류 상태 코드", "Error status: $status")
+                                        Log.d("회원가입 오류 메시지", "Error message: $message")
+
+                                        Toast.makeText(context, "$message", Toast.LENGTH_SHORT).show()
+
+                                    }
+
+
+
+//                                    val json = JSONObject(response.body().toString())
+//                                    val status = json.getInt("status")
+//                                    val message = json.getString("message")
+//                                    val data = json.getJSONObject("data")
+//                                    val userPk = data.getInt("userPk")
 
 
 //                                    val Json = Gson().toJson(response.body())
@@ -499,13 +554,10 @@ fun SignupScreen(){
 //                                    val status = data.getInt("status")
 //                                    val message = data.getString("message")
 
-                                    Log.d("회원가입 LoginActivity", "${response.body()}")
-                                    Log.d("회원가입 성공", "$status $message, userPk: $userPk")
-                                    checkCredentials(credentials, context)
 
 
                                 }catch (e:Exception){
-                                    Log.d("회원가입 오류", "")
+                                    Log.d("회원가입 오류", "$e")
 
                                 }
 
@@ -513,7 +565,7 @@ fun SignupScreen(){
                             }
 
                         },
-                        enabled = credentials.isNotEmpty(),
+                        enabled = credentialJoin.isNotEmpty(),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.width(200.dp)
                     ) {
@@ -572,10 +624,26 @@ fun checkCredentials(creds: Credentials, context: Context) {
     }
 }
 
+fun checkCredentialJoin(creds: CredentialJoin, context: Context) {
+
+    if(creds.isNotEmpty()) {
+        context.startActivity(Intent(context, MainActivity::class.java))
+        (context as Activity).finish()
+    } else {
+        Toast.makeText(context, "아이디 또는 비밀번호가 옳지 않습니다", Toast.LENGTH_SHORT).show()
+    }
+}
+
 
 data class Credentials(var id : String = "", var pwd : String = "", var remember : Boolean = false) {
     fun isNotEmpty() : Boolean {
         return id.isNotEmpty() && pwd.isNotEmpty()
+    }
+}
+
+data class CredentialJoin(var id : String = "", var pwd : String = "", var pwdck : String = "", var remember : Boolean = false) {
+    fun isNotEmpty() : Boolean {
+        return id.isNotEmpty() && pwd.isNotEmpty() && pwdck.isNotEmpty()
     }
 }
 
@@ -774,7 +842,7 @@ fun PasswordCheckField(
         trailingIcon = trailingIcon,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(
-            onDone = { focusManager.clearFocus(); submit() }
+            onDone = { focusManager.clearFocus(); }
 
         ),
         placeholder = { Text(placeholder) },
