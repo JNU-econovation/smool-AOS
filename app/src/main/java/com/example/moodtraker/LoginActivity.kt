@@ -3,7 +3,6 @@ package com.example.moodtraker
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -39,11 +37,9 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +52,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -69,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.moodtraker.RetrofitInstance.BASE_URL
+//import com.example.moodtraker.UserPkSet.userPk
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -83,6 +79,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
 import java.text.DateFormat
 
 class LoginActivity : ComponentActivity() {
@@ -91,8 +89,8 @@ class LoginActivity : ComponentActivity() {
 
         setContent{
 
-            //LoginScreen()
-            SignupScreen()
+            LoginScreen()
+            //SignupScreen()
         }
     }
 }
@@ -114,7 +112,30 @@ data class UserResponse(
 )
 
 data class UserPK(
-    val userPK : Int
+    val userPk : Int
+)
+
+
+// 캘린더
+
+data class CalendarRequest(
+    val dates : Int,
+    val userPk : Int
+)
+
+data class CalendarResponse(
+    val status : Int,
+    val message : String,
+    val data : CalendarData
+)
+
+data class CalendarData(
+    val existDates: List<ExistDate>
+)
+
+data class ExistDate(
+    val localDate: String,
+    val exist: Boolean
 )
 
 
@@ -123,8 +144,6 @@ object RetrofitInstance {
 
     
     fun getInstance() : Retrofit {
-
-
 
         return retrofit
     }
@@ -146,6 +165,24 @@ val retrofit: Retrofit = Retrofit.Builder()
 
 
 
+//object UserPkSet {
+//
+//    // userPk 값 초기화
+//    var userPk = 0
+//
+//    // userPk의 getter 메서드
+//    fun getUserPk(): Int {
+//        return userPk
+//    }
+//
+//    // userPk 값을 설정하는 메서드
+//    fun setUserPk(value: Int) {
+//        userPk = value
+//    }
+//}
+
+
+
 interface MyApi {
 
     // 회원가입
@@ -154,11 +191,19 @@ interface MyApi {
 
     // 로그인
     @POST("/user/login")
-    suspend fun login(@Body post: Post) : Response<Int>
+    suspend fun login(@Body post: Post) : Response<UserResponse>
 
     // 로그아웃
     @POST("/user/logout")
     suspend fun logout() : Response<BaseResponse>
+
+    // 캘린더 화면 표시
+//    @GET("/calendar/{dates}")
+//    suspend fun calendar(
+//        @Path("dates") dates: Int,
+//        @Query userPk: UserPK
+//    ) : Response<CalendarResponse>
+
     
 
 }
@@ -265,14 +310,29 @@ fun LoginScreen(){
                                     Post(userId = credentials.id, password = credentials.pwd)
 
                                 try {
+
                                     val response = myApi.login(loginRequest)
                                     Log.d("로그인 LoginActivity", "${response.body()}")
 
-                                    val json = JSONObject(response.body().toString())
-                                    val status = json.getInt("status")
-                                    val message = json.getString("message")
-                                    val data = json.getJSONObject("data")
-                                    val userPk = data.getInt("userPK")
+
+                                    val userResponse = response.body()
+                                    if(userResponse != null) {
+                                        val status = userResponse.status
+                                        val message = userResponse.message
+                                        val userPk = userResponse.data.userPk
+
+                                        Log.d("로그인 LoginActivity", "${response.body()}")
+                                        Log.d("로그인 성공", "$status $message, userPk: $userPk")
+                                        checkCredentials(credentials, context)
+                                    } else {
+                                        Log.d("로그인 오류", "Response body is null")
+                                    }
+
+//                                    val json = JSONObject(response.body().toString())
+//                                    val status = json.getInt("status")
+//                                    val message = json.getString("message")
+//                                    val data = json.getJSONObject("data")
+//                                    val userPk = data.getInt("userPk")
 
 
 //                                    멘토링 코드
@@ -281,16 +341,16 @@ fun LoginScreen(){
 //                                    val status = data.getInt("status")
 //                                    val message = data.getString("message")
 
-
-                                    Log.d("로그인 LoginActivity", "${response.body()}")
-                                    Log.d("로그인 성공", "$status $message, userPk: $userPk")
-                                    checkCredentials(credentials, context)
+//
+//                                    Log.d("로그인 LoginActivity", "${response.body()}")
+//                                    Log.d("로그인 성공", "$status $message, userPk: $userPk")
+//                                    checkCredentials(credentials, context)
 
 
 
 
                                 }catch (e:Exception){
-                                    Log.d("로그인 오류", "")
+                                    Log.d("로그인 오류", "$e")
                                 }
 
 
@@ -381,7 +441,7 @@ fun SignupScreen(){
                     )
                     PasswordCheckField(
                         value = exPwd,
-                        onChange = { data -> exPwd },
+                        onChange = { data -> exPwd = data },
                         submit = {
                             if (exPwd != credentials.pwd)
                                 Toast.makeText(context, "비밀번호가 일치하지 않습니다", Toast.LENGTH_SHORT).show()
@@ -430,7 +490,7 @@ fun SignupScreen(){
 //                                    val status = json.getInt("status")
 //                                    val message = json.getString("message")
 //                                    val data = json.getJSONObject("data")
-//                                    val userPK = data.getInt("userPK")
+//                                    val userPk = data.getInt("userPk")
 
 
 //                                    멘토링 코드
@@ -465,6 +525,11 @@ fun SignupScreen(){
         }
     }
 }
+
+
+
+
+
 
 
 // 로그아웃 버튼 클릭시
@@ -709,8 +774,8 @@ fun PasswordCheckField(
         trailingIcon = trailingIcon,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(
-            onDone = { focusManager.clearFocus();  }
-            //submit()
+            onDone = { focusManager.clearFocus(); submit() }
+
         ),
         placeholder = { Text(placeholder) },
         singleLine = true,
