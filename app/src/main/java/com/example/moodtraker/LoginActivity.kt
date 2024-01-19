@@ -167,6 +167,18 @@ val retrofit: Retrofit = Retrofit.Builder()
     .build()
 
 
+class User {
+    var userPk: Int = 0
+        get() = field
+        set(value) {
+            field = value
+        }
+}
+
+
+val user = User()
+
+
 
 
 //object UserPkSet {
@@ -338,8 +350,11 @@ fun LoginScreen(){
                                             Log.d("로그인 LoginActivity", "${response.body()}")
 
                                             if (data != null) {
-                                                val userPk = data.userPk
-                                                Log.d("로그인 성공", "$status $message, userPk: $userPk")
+                                                //userPk = data.userPk
+
+                                                user.userPk = data.userPk  // setter 메소드를 통한 userPk 변경
+                                                Log.d("로그인 userPk", "userPk: ${user.userPk}") // getter 메소드를 통한 userPk 가져오기
+                                                Log.d("로그인 성공", "$status $message, userPk: ${user.userPk}")
 
                                                 context.startActivity(Intent(context, MainActivity::class.java))
                                                 (context as Activity).finish()
@@ -538,10 +553,10 @@ fun SignupScreen(){
                                         if(userResponse != null) {
                                             val status = userResponse.status
                                             val message = userResponse.message
-                                            val userPk = userResponse.data.userPk
+                                            user.userPk = userResponse.data.userPk
 
                                             Log.d("회원가입 LoginActivity", "${response.body()}")
-                                            Log.d("회원가입 성공", "$status $message, userPk: $userPk")
+                                            Log.d("회원가입 성공", "$status $message, userPk: $user.userPk")
 
                                             context.startActivity(Intent(context, MainActivity::class.java))
                                             (context as Activity).finish()
