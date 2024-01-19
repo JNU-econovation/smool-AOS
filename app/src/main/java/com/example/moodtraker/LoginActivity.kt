@@ -86,8 +86,8 @@ class LoginActivity : ComponentActivity() {
 
         setContent{
 
-            //LoginScreen()
-            SignupScreen()
+            LoginScreen()
+            //SignupScreen()
         }
     }
 }
@@ -322,20 +322,55 @@ fun LoginScreen(){
 
                                     val response = myApi.login(loginRequest)
                                     Log.d("로그인 LoginActivity", "${response.body()}")
+                                    Log.d("로그인 응답 코드", "HTTP status code: ${response.code()}")
+                                    Log.d("로그인 응답 성공 여부", "Is successful: ${response.isSuccessful}")
 
 
-                                    val userResponse = response.body()
-                                    if(userResponse != null) {
-                                        val status = userResponse.status
-                                        val message = userResponse.message
-                                        val userPk = userResponse.data.userPk
+                                    if (response.isSuccessful) {
+                                        // 응답이 성공적일 때
 
-                                        Log.d("로그인 LoginActivity", "${response.body()}")
-                                        Log.d("로그인 성공", "$status $message, userPk: $userPk")
-                                        checkCredentials(credentials, context)
+                                        val userResponse = response.body()
+                                        if(userResponse != null) {
+                                            val status = userResponse.status
+                                            val message = userResponse.message
+                                            val data = userResponse.data
+
+                                            Log.d("로그인 LoginActivity", "${response.body()}")
+
+                                            if (data != null) {
+                                                val userPk = data.userPk
+                                                Log.d("로그인 성공", "$status $message, userPk: $userPk")
+
+                                                context.startActivity(Intent(context, MainActivity::class.java))
+                                                (context as Activity).finish()
+
+                                                //checkCredentialJoin(credentialJoin, context)
+                                            } else {
+                                                Log.d("로그인 실패", "$status $message, data is null")
+                                                Toast.makeText(context, "$message", Toast.LENGTH_SHORT).show()
+                                            }
+
+                                        } else {
+                                            Log.d("로그인 오류", "Response body is null")
+                                        }
+
                                     } else {
-                                        Log.d("로그인 오류", "Response body is null")
+                                        // 응답이 실패했을 때
+
+                                        val errorMessage = response.errorBody()?.string()
+                                        Log.d("로그인 오류 메시지", "Error message: $errorMessage")
+                                        val jsonObject = JSONObject(errorMessage)
+                                        val status = jsonObject.getInt("status")
+                                        val message = jsonObject.getString("message")
+                                        Log.d("로그인 오류 상태 코드", "Error status: $status")
+                                        Log.d("로그인 오류 메시지", "Error message: $message")
+
+                                        Toast.makeText(context, "$message", Toast.LENGTH_SHORT).show()
+
                                     }
+
+
+
 
 //                                    val json = JSONObject(response.body().toString())
 //                                    val status = json.getInt("status")
