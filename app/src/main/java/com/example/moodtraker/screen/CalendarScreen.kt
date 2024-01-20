@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -194,12 +195,21 @@ fun CalendarContents(
     val todayDate = SimpleDateFormat("dd", Locale.KOREA).format(today.value.time).toInt()
     val todayTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(today.value.time)
 
-    Log.d("캘린더", "resultTime: $resultTime")
+    var resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
 
-    val existList = remember { mutableStateListOf<Boolean>() }
+    var existList = remember { mutableStateListOf<Boolean>() }
 
-    fun updateCalendar() {
-        var resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
+    var isExistListLoaded = remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(resultLog) {
+
+        //existList = mutableStateListOf<Boolean>()
+
+        existList.clear()
+        isExistListLoaded.value = false
+
+
         Log.d("캘린더 업데이트", "resultLog: $resultLog")
         var dayMax = date.value.getActualMaximum(Calendar.DAY_OF_MONTH)
         var tmp = "$resultLog-$dayMax"
@@ -241,8 +251,10 @@ fun CalendarContents(
                         Log.d("캘린더 상세 데이터", "$localDate $exist")
                     }
 
-                    Log.d("캘린더 existList", "existList: $existList")
+                    Log.d("캘린더 existList", "existList: ${existList.joinToString()}")
                     Log.d("캘린더 existList", "existList: ${existList.size}")
+
+                    isExistListLoaded.value = true
 
                 }
 
@@ -264,8 +276,9 @@ fun CalendarContents(
 
         }
 
-
     }
+
+    Log.d("캘린더", "resultTime: $resultTime")
 
 
 
@@ -317,7 +330,8 @@ fun CalendarContents(
                 newDate.add(Calendar.MONTH, -1)
                 date.value = newDate
                 Log.d("캘린더 updatecalendar", "1 start")
-                updateCalendar()
+                //updateCalendar()
+                resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
                 Log.d("캘린더 updatecalendar", "1 end")
 
             },
@@ -346,7 +360,8 @@ fun CalendarContents(
                 newDate.add(Calendar.MONTH, +1)
                 date.value = newDate
                 Log.d("캘린더 updatecalendar", "2 start")
-                updateCalendar()
+                //updateCalendar()
+                resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
                 Log.d("캘린더 updatecalendar", "2 end")
 
             },
@@ -400,7 +415,8 @@ fun CalendarContents(
     Log.d("monthWeeksCount", monthWeeksCount.toString())
 
     Log.d("캘린더 updatecalendar", "본문 start")
-    updateCalendar()
+    //updateCalendar()
+    resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
     Log.d("캘린더 updatecalendar", "본문 end")
 
     Column() {
@@ -450,13 +466,14 @@ fun CalendarContents(
                                     )
                                 }
 
-                                if (existList != null && resultDay < existList.size) {
-                                    if (existList[resultDay] == true) {
-                                        Log.d("캘린더 circle 아이콘", "existList[resultDay]: ${existList[resultDay]}")
+
+                                if (isExistListLoaded.value && (resultDay - 1) < existList.size) {
+                                    if (existList[resultDay-1] == true) {
+                                        Log.d("캘린더 circle 아이콘", "existList[resultDay]: ${existList[resultDay-1]}")
                                         Icon(Icons.Default.Circle, contentDescription = "circle", tint = Color.White, modifier = Modifier.size(10.dp))
                                     }
                                 } else {
-                                    Log.d("캘린더 existList 오류","existList: $existList")
+                                    Log.d("캘린더 existList 오류","existList: ${existList.joinToString()}")
                                     Log.d("캘린더 existList 오류","resultDay: $resultDay")
                                     Log.d("캘린더 existList 오류","existList.size: ${existList.size}")
                                 }
