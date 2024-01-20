@@ -239,10 +239,10 @@ interface MyApi {
     suspend fun logout() : Response<BaseResponse>
 
     // 캘린더 화면 표시
-    @GET("/calendar/{dates}")
+    @GET("/calendar/{userPk}/{dates}")
     suspend fun calendar(
-        @Path("dates") dates: String,
-        @Body userPk: UserPK
+        @Path("userPk") userPk: Int,
+        @Path("dates") dates: String
     ) : Response<CalendarResponse>
 
 

@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -74,9 +75,13 @@ val myApi = RetrofitInstance.getInstance().create(MyApi::class.java)
 @Composable
 fun LogNav(navHostController: NavHostController) {
 
+    Log.d("캘린더 반복", "LogNav 호출")
+
     NavHost(navController = navHostController, startDestination = "CalendarScreen") {
         composable("CalendarScreen") {
+            Log.d("캘린더 반복", "calendar 화면 전환")
             CalendarContent(navHostController)
+
         }
 //        composable("LogScreen") { navBackStackEntry ->
 //            LogScaffold(resultTime = navBackStackEntry.arguments?.getString("resultTime"))
@@ -93,6 +98,7 @@ fun LogNav(navHostController: NavHostController) {
             val resultTime = navBackStackEntry.arguments?.getString("resultTime")
             val resultDay = navBackStackEntry.arguments?.getInt("resultDay")
             LogScaffold(resultTime = resultTime, resultDay = resultDay)
+            Log.d("캘린더 반복", "log 화면 전환")
         }
 
     }
@@ -100,6 +106,9 @@ fun LogNav(navHostController: NavHostController) {
 
 @Composable
 fun CalendarContent(navHostController: NavHostController) {
+
+    Log.d("캘린더 반복", "CalendarContent 호출")
+
     val calendarInstance = Calendar.getInstance()
     val time = remember {
         mutableStateOf(calendarInstance)
@@ -170,6 +179,8 @@ fun CalendarContents(
     navController: NavHostController,
 ) {
 
+    Log.d("캘린더 반복", "calendarContents 호출")
+
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -185,7 +196,7 @@ fun CalendarContents(
 
     Log.d("캘린더", "resultTime: $resultTime")
 
-    val existList = mutableListOf<Boolean>()
+    val existList = remember { mutableStateListOf<Boolean>() }
 
     fun updateCalendar() {
         var resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
@@ -197,34 +208,53 @@ fun CalendarContents(
             Log.d("캘린더 클릭", "")
             val calendarRequest =
                 UserPK(userPk = userPk)
+            Log.d("캘린더 request", "$calendarRequest")
 
             try {
 
                 Log.d("캘린더 1111", "1111")   // 백엔드가 코드 바꿔줘야 함. response에서 형태 막힘
-                val response = myApi.calendar(resultLog, calendarRequest)
+                val response = myApi.calendar(calendarRequest.userPk, tmp)
                 Log.d("캘린더 response.body", "${response.body()}")
-                Log.d("로그인 응답 코드", "HTTP status code: ${response.code()}")
-                Log.d("로그인 응답 성공 여부", "Is successful: ${response.isSuccessful}")
+                Log.d("캘린더 응답 코드", "HTTP status code: ${response.code()}")
+                Log.d("캘린더 응답 성공 여부", "Is successful: ${response.isSuccessful}")
 
-                val json = JSONObject(response.body().toString())
-                val status = json.getInt("status")
-                val message = json.getString("message")
-                val data = json.getJSONObject("data")
-                val existDates = data.getJSONArray("existDates")
 
-                Log.d("캘린더 데이터", "$status $message $data $existDates")
+                if(response.isSuccessful) {
 
-                for (i in 0 until existDates.length()) {
-                    val dateExist = existDates.getJSONObject(i)
-                    val localDate = dateExist.getString("localDate")
-                    val exist = dateExist.getBoolean("exist")
+                    Log.d("캘린더 response", "response is successful")
 
-                    existList.add(exist)
+                    val json = response.body()
+                    Log.d("캘린더 json", "$json")
+                    val status = json?.status
+                    val message = json?.message
+                    val data = json?.data
+                    val existDates = data?.existDates
 
-                    Log.d("캘린더 상세 데이터", "$localDate $exist")
+                    Log.d("캘린더 데이터", "$status $message $data $existDates")
+
+                    existDates?.forEach { dateExist ->
+                        val localDate = dateExist.localDate
+                        val exist = dateExist.exist
+
+                        existList.add(exist)
+
+                        Log.d("캘린더 상세 데이터", "$localDate $exist")
+                    }
+
+                    Log.d("캘린더 existList", "existList: $existList")
+                    Log.d("캘린더 existList", "existList: ${existList.size}")
+
                 }
 
-                Log.d("캘린더 existList", "existList: $existList")
+                else {
+                    val errorMessage = response.errorBody()?.string()
+                    Log.d("캘린더 오류 메시지", "Error message: $errorMessage")
+                    val jsonObject = JSONObject(errorMessage)
+                    val status = jsonObject.getInt("status")
+                    val message = jsonObject.getString("message")
+                    Log.d("캘린더 오류 상태 코드", "Error status: $status")
+                    Log.d("캘린더 오류 메시지", "Error message: $message")
+                }
 
 
             }catch (e:Exception){
@@ -269,8 +299,6 @@ fun CalendarContents(
 
 
 
-
-
     // 캘린더 헤더
 
 
@@ -288,7 +316,9 @@ fun CalendarContents(
                 newDate.time = date.value.time
                 newDate.add(Calendar.MONTH, -1)
                 date.value = newDate
+                Log.d("캘린더 updatecalendar", "1 start")
                 updateCalendar()
+                Log.d("캘린더 updatecalendar", "1 end")
 
             },
             colors = ButtonDefaults.buttonColors(
@@ -315,7 +345,9 @@ fun CalendarContents(
                 newDate.time = date.value.time
                 newDate.add(Calendar.MONTH, +1)
                 date.value = newDate
+                Log.d("캘린더 updatecalendar", "2 start")
                 updateCalendar()
+                Log.d("캘린더 updatecalendar", "2 end")
 
             },
             colors = ButtonDefaults.buttonColors(
@@ -354,6 +386,7 @@ fun CalendarContents(
 
     // 캘린더 날짜
 
+
     date.value.set(Calendar.DAY_OF_MONTH, 1)
 
     val monthDayMax = date.value.getActualMaximum(Calendar.DAY_OF_MONTH)    // 현재 달의 max
@@ -365,6 +398,10 @@ fun CalendarContents(
     Log.d("monthDayMax", monthDayMax.toString())
     Log.d("monthFirstDay", monthFirstDay.toString())
     Log.d("monthWeeksCount", monthWeeksCount.toString())
+
+    Log.d("캘린더 updatecalendar", "본문 start")
+    updateCalendar()
+    Log.d("캘린더 updatecalendar", "본문 end")
 
     Column() {
         repeat(monthWeeksCount) {week ->
@@ -413,9 +450,18 @@ fun CalendarContents(
                                     )
                                 }
 
-                                if (exist == true) {
-                                    Icon(Icons.Default.Circle, contentDescription = "circle", tint = Color.White, modifier = Modifier.size(10.dp))
+                                if (existList != null && resultDay < existList.size) {
+                                    if (existList[resultDay] == true) {
+                                        Log.d("캘린더 circle 아이콘", "existList[resultDay]: ${existList[resultDay]}")
+                                        Icon(Icons.Default.Circle, contentDescription = "circle", tint = Color.White, modifier = Modifier.size(10.dp))
+                                    }
+                                } else {
+                                    Log.d("캘린더 existList 오류","existList: $existList")
+                                    Log.d("캘린더 existList 오류","resultDay: $resultDay")
+                                    Log.d("캘린더 existList 오류","existList.size: ${existList.size}")
                                 }
+
+
 
                             }
 
