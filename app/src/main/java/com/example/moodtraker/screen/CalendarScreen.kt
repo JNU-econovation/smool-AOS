@@ -185,6 +185,8 @@ fun CalendarContents(
 
     Log.d("캘린더", "resultTime: $resultTime")
 
+    val existList = mutableListOf<Boolean>()
+
     fun updateCalendar() {
         var resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
         Log.d("캘린더 업데이트", "resultLog: $resultLog")
@@ -217,8 +219,12 @@ fun CalendarContents(
                     val localDate = dateExist.getString("localDate")
                     val exist = dateExist.getBoolean("exist")
 
+                    existList.add(exist)
+
                     Log.d("캘린더 상세 데이터", "$localDate $exist")
                 }
+
+                Log.d("캘린더 existList", "existList: $existList")
 
 
             }catch (e:Exception){
