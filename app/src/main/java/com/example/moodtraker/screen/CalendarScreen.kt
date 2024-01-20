@@ -188,7 +188,9 @@ fun CalendarContents(
     fun updateCalendar() {
         var resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(date.value.time)
         Log.d("캘린더 업데이트", "resultLog: $resultLog")
-
+        var dayMax = date.value.getActualMaximum(Calendar.DAY_OF_MONTH)
+        var tmp = "$resultLog-$dayMax"
+        Log.d("캘린더 tmp", "$tmp")
         coroutineScope.launch {
             Log.d("캘린더 클릭", "")
             val calendarRequest =
