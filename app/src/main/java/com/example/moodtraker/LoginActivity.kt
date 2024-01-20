@@ -138,6 +138,31 @@ data class ExistDate(
 )
 
 
+// 로그
+
+data class LogResponse(
+    val status : Int,
+    val message : String,
+    val data : Emotions
+)
+
+data class Emotions(
+    val happiness : Int,
+    val gloom : Int,
+    val anxiety : Int,
+    val stress : Int,
+    val sleep : Int,
+    val todayDiaries : List<DiaryContent>
+)
+
+data class DiaryContent(
+    val diaryPk : Int,
+    val content : String
+)
+
+
+
+
 object RetrofitInstance {
     val BASE_URL = "http://192.168.0.251:8080"
 
@@ -219,6 +244,14 @@ interface MyApi {
         @Path("dates") dates: String,
         @Body userPk: UserPK
     ) : Response<CalendarResponse>
+
+
+    // 로그 화면
+    @GET("calendar/date/{date}")
+    suspend fun log(
+        @Path("date") date: String,
+        @Body userPk: UserPK
+    ) : Response<LogResponse>
 
     
 
