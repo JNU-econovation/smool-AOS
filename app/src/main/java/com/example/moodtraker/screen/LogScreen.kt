@@ -1,9 +1,6 @@
 package com.example.moodtraker.screen
 
-import android.app.Activity
-import android.content.Intent
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.SnackbarHost
@@ -28,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
@@ -75,8 +71,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.moodtraker.MainActivity
-import com.example.moodtraker.Post
 import com.example.moodtraker.R
 import com.example.moodtraker.UserPK
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
@@ -85,8 +79,6 @@ import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.time.Month
-import java.time.Year
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -525,15 +517,11 @@ fun LogAlertDialog(
 }
 
 @Composable
-fun emotionBox(){
+fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety : MutableState<Int>, stress : MutableState<Int>, sleep : MutableState<Int>){
 
-    var happiness by remember { mutableStateOf(0) }
-    var gloom by remember { mutableStateOf(0) }
-    var anxiety by remember { mutableStateOf(0) }
-    var stress by remember { mutableStateOf(0) }
-    var sleep by remember { mutableStateOf(0) }
 
     var expanded by remember { mutableStateOf(false) }
+    Log.d("로그화면 emotionBox", "${happiness.value}, ${gloom.value}, ${anxiety.value}, ${stress.value}, ${sleep.value}")
 
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -625,27 +613,27 @@ fun emotionBox(){
                 ) {
                     //
                     Text(
-                        text = happiness.toString(),
+                        text = happiness.value.toString(),
                         color = Color.White,
                         modifier = Modifier.padding(start = 56.dp)
                     )
                     Text(
-                        gloom.toString(),
+                        gloom.value.toString(),
                         color = Color.White,
                         modifier = Modifier.padding(start = 40.dp)
                     )
                     Text(
-                        anxiety.toString(),
+                        anxiety.value.toString(),
                         color = Color.White,
                         modifier = Modifier.padding(start = 42.dp)
                     )
                     Text(
-                        stress.toString(),
+                        stress.value.toString(),
                         color = Color.White,
                         modifier = Modifier.padding(start = 54.dp)
                     )
                     Text(
-                        sleep.toString(),
+                        sleep.value.toString(),
                         color = Color.White,
                         modifier = Modifier.padding(start = 60.dp)
                     )
@@ -682,7 +670,7 @@ fun emotionBox(){
                     )
                     //Spacer(modifier = Modifier.width(10.dp))
                     EmotionSlider(initialValue = happiness) { emotion ->
-                        happiness = emotion
+                        happiness.value = emotion
                     }
                     //happy =
 
@@ -700,7 +688,7 @@ fun emotionBox(){
                         textAlign = TextAlign.Center
                     )
                     EmotionSlider(initialValue = gloom) { emotion ->
-                        gloom = emotion
+                        gloom.value = emotion
                     }
                 }
                 Row(
@@ -715,8 +703,8 @@ fun emotionBox(){
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
-                    EmotionSlider(initialValue = anxiety) {emotion ->
-                        anxiety = emotion
+                    EmotionSlider(initialValue = anxiety) { emotion ->
+                        anxiety.value = emotion
                     }
                 }
                 Row(
@@ -731,8 +719,8 @@ fun emotionBox(){
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
-                    EmotionSlider(initialValue = stress) {emotion ->
-                        stress = emotion
+                    EmotionSlider(initialValue = stress) { emotion ->
+                        stress.value = emotion
                     }
                 }
                 Row(
@@ -747,8 +735,8 @@ fun emotionBox(){
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
-                    EmotionSlider(initialValue = sleep) {emotion ->
-                        sleep = emotion
+                    EmotionSlider(initialValue = sleep) { emotion ->
+                        sleep.value = emotion
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -785,8 +773,9 @@ fun emotionBox(){
 //}
 
 @Composable
-fun EmotionSlider(initialValue: Int, onEmotionChanged: (Int) -> Unit) {
-    var sliderPosition by remember { mutableStateOf(initialValue.toFloat()) }
+fun EmotionSlider(initialValue: MutableState<Int>, onEmotionChanged: (Int) -> Unit) {
+
+    var sliderPosition by remember { mutableStateOf(initialValue.value.toFloat()) }
 
     Column {
         Slider(
@@ -957,6 +946,14 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
         Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
     }
 
+    // 감정 변수
+    var happiness by remember { mutableStateOf(0) }
+    var gloom by remember { mutableStateOf(0) }
+    var anxiety by remember { mutableStateOf(0) }
+    var stress by remember { mutableStateOf(0) }
+    var sleep by remember { mutableStateOf(0) }
+
+
     var isContentListLoaded = remember { mutableStateOf(false) }
 
 
@@ -1030,11 +1027,11 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                     val message = json?.message
                     val data = json?.data
 
-                    val happiness = data?.happiness
-                    val gloom = data?.gloom
-                    val anxiety = data?.anxiety
-                    val stress = data?.stress
-                    val sleep = data?.sleep
+                    happiness = data?.happiness!!.toInt()
+                    gloom = data?.gloom!!.toInt()
+                    anxiety = data?.anxiety!!.toInt()
+                    stress = data?.stress!!.toInt()
+                    sleep = data?.sleep!!.toInt()
                     val todayDiaries = data?.todayDiaries
 
                     Log.d("로그화면 데이터 셋", "$status $message $data")
@@ -1156,7 +1153,9 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                     else {
 
                         // 작성화면 여부와 관계없이 count 값이 1 이상이면 emotionBox()는 동일
-                        emotionBox()
+                        //emotionBox(happiness, gloom, anxiety, stress, sleep)
+                        emotionBox(remember { mutableStateOf(happiness) }, remember { mutableStateOf(gloom) }, remember { mutableStateOf(anxiety) }, remember { mutableStateOf(stress) }, remember { mutableStateOf(sleep) })
+
 
                         if (write == false) {   // 작성화면이 아닐때
 
