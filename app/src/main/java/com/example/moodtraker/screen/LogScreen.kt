@@ -1,6 +1,9 @@
 package com.example.moodtraker.screen
 
+import android.app.Activity
+import android.content.Intent
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.SnackbarHost
@@ -54,6 +57,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -70,10 +74,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.moodtraker.MainActivity
+import com.example.moodtraker.Post
 import com.example.moodtraker.R
+import com.example.moodtraker.UserPK
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
+import com.example.moodtraker.user
 import com.maxkeppeker.sheets.core.models.base.rememberSheetState
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.time.Month
 import java.time.Year
@@ -198,34 +207,50 @@ fun extractYearAndMonth(dateString: String): List<Int> {
     return listOf(year, month)
 }
 
+fun extractYearAndMonthAndDay(dateString: String): List<Int> {
+    val pattern = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA) // dd일을 추가했습니다.
+    val date = pattern.parse(dateString)
+    val calendar = Calendar.getInstance()
+    calendar.time = date ?: Date()
+
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH) + 1 // 월은 0부터 시작하므로 1을 더해줍니다.
+    val day = calendar.get(Calendar.DAY_OF_MONTH) // 일을 추가했습니다.
+
+    return listOf(year, month, day)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogHeader(resultTime: String?, resultDay: Int?, write: Boolean, standby:Boolean,
-              onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit, onModify: () -> Unit, onDelete: () -> Unit){
+fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, standby:Boolean,
+              onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit, onModify: () -> Unit, onDelete: () -> Unit, updateResultTime: () -> Unit){
 
-    // 날짜 추출
-    val yearAndMonth = extractYearAndMonth(resultTime.toString())
-    val year = yearAndMonth[0]
-    val month = yearAndMonth[1]
-    val day = resultDay
+//    // 날짜 추출
+//    val yearAndMonth = extractYearAndMonth(resultTime.toString())
+//    val year = yearAndMonth[0]
+//    val month = yearAndMonth[1]
+//    val day = resultDay
+//
+//    // 선택된 날짜로 설정
+//    val calendarInstance = remember {
+//        Calendar.getInstance().apply {
+//            set(Calendar.YEAR, year)
+//            set(Calendar.MONTH, month - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
+//            set(Calendar.DAY_OF_MONTH, day!!)
+//        }
+//    }
+//
+//    // 날짜 포맷
+//    var resultTime by remember { mutableStateOf(SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)) }
+//
+//    // 날짜 업데이트
+//    fun updateResultTime() {
+//        resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+//        Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
+//    }
 
-    // 선택된 날짜로 설정
-    val calendarInstance = remember {
-        Calendar.getInstance().apply {
-            set(Calendar.YEAR, year)
-            set(Calendar.MONTH, month - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
-            set(Calendar.DAY_OF_MONTH, day!!)
-        }
-    }
-
-    // 날짜 포맷
-    var resultTime by remember { mutableStateOf(SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)) }
-
-    // 날짜 업데이트
-    fun updateResultTime() {
-        resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
-        Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
-    }
+    var resultTime by remember { mutableStateOf(resultTime) }
+    Log.d("로그화면 resultTime", "resultTime: $resultTime")
 
 
     var expanded by remember { mutableStateOf(false) }
@@ -897,6 +922,12 @@ fun LogDiary(content: String) {
 @Composable
 fun LogScaffold(resultTime: String?, resultDay: Int?){
 
+    val coroutineScope = rememberCoroutineScope()
+
+    val userPk = user.userPk
+    Log.d("로그화면 로그인 userPk", "userPk: $userPk")
+
+
     var write by remember { mutableStateOf(false) }
     //val calendarInstance = Calendar.getInstance()
 //    val time = remember {
@@ -910,8 +941,143 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
     var content by remember { mutableStateOf("") }
 
-    //var present by remember { mutableStateOf(resultTime) }
+    var contentList = remember { mutableStateListOf<String>() }
 
+
+    // 날짜 추출
+    val yearAndMonth = extractYearAndMonth(resultTime.toString())
+    val year = yearAndMonth[0]
+    val month = yearAndMonth[1]
+    val day = resultDay
+
+    // 선택된 날짜로 설정
+    val calendarInstance = remember {
+        Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month - 1) // Calendar.MONTH는 0부터 시작하므로 -1 해줍니다.
+            set(Calendar.DAY_OF_MONTH, day!!)
+        }
+    }
+
+    // 날짜 포맷
+    var resultTime by remember { mutableStateOf(SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)) }
+
+    // 날짜 업데이트
+    fun updateResultTime() {
+        resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+        Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
+    }
+
+
+    fun updateLog() {
+        coroutineScope.launch {
+            Log.d("로그화면 클릭", "")
+            Log.d("로그화면 클릭", "$resultTime")
+
+
+            // 통신 데이터 가공
+
+            val yearAndMonth = extractYearAndMonthAndDay(resultTime.toString())
+            Log.d("로그화면 yearMonthDay", "yearAndMonth: $yearAndMonth")
+            val year = yearAndMonth[0]
+            val month = yearAndMonth[1]
+            val day = yearAndMonth[2]
+            var dayString = ""
+            var monthString = ""
+            var tmp = ""
+
+            if (day < 10 || month < 10) {
+                if (day < 10 && month < 10) {
+                    dayString = "0" + day.toString()
+                    monthString = "0" + month.toString()
+                } else {
+                    if (day < 10) {
+                        dayString = "0" + day.toString()
+                        monthString = month.toString()
+                    }
+                    if (month < 10) {
+                        monthString = "0" + month.toString()
+                        dayString = day.toString()
+                    }
+                }
+
+                tmp = "$year-$monthString-$dayString"
+            } else {
+                tmp = "$year-$month-$day"
+            }
+
+            Log.d("로그화면 tmp", "tmp: $tmp")
+
+
+            val logRequest =
+                UserPK(userPk = userPk)
+            Log.d("로그화면 request", "$logRequest")
+
+            try {
+
+                Log.d("로그화면 1111", "1111")
+                val response = myApi.log(logRequest.userPk, tmp)
+                Log.d("로그화면 response.body", "${response.body()}")
+                Log.d("로그화면 응답 코드", "HTTP status code: ${response.code()}")
+                Log.d("로그화면 응답 성공 여부", "Is successful: ${response.isSuccessful}")
+
+
+                if(response.isSuccessful) {
+
+                    Log.d("로그화면 response", "response is successful")
+
+                    val json = response.body()
+                    Log.d("로그화면 json", "$json")
+                    val status = json?.status
+                    val message = json?.message
+                    val data = json?.data
+
+                    val happiness = data?.happiness
+                    val gloom = data?.gloom
+                    val anxiety = data?.anxiety
+                    val stress = data?.stress
+                    val sleep = data?.sleep
+                    val todayDiaries = data?.todayDiaries
+
+                    Log.d("로그화면 데이터 셋", "$status $message $data")
+                    Log.d("로그화면 데이터 감정", "$happiness $gloom $anxiety $stress $sleep")
+                    Log.d("로그화면 데이터 일기 리스트", "$todayDiaries")
+
+                    todayDiaries?.forEach { diaryExist ->
+                        val diaryPk = diaryExist.diaryPk
+                        val content = diaryExist.content
+
+                        contentList.add(content)
+
+                        Log.d("로그화면 상세 데이터", "$diaryPk $content")
+                    }
+
+                    Log.d("로그화면 contentList", "contentList: ${contentList.joinToString()}")
+                    Log.d("로그화면 contentList", "contentList.size: ${contentList.size}")
+
+
+                }
+
+                else {
+                    val errorMessage = response.errorBody()?.string()
+                    Log.d("로그화면 오류 메시지", "Error message: $errorMessage")
+                    val jsonObject = JSONObject(errorMessage)
+                    val status = jsonObject.getInt("status")
+                    val message = jsonObject.getString("message")
+                    Log.d("로그화면 오류 상태 코드", "Error status: $status")
+                    Log.d("로그화면 오류 메시지", "Error message: $message")
+                }
+
+
+            }catch (e:Exception){
+                Log.d("로그 오류", "$e")
+            }
+
+
+        }
+    }
+
+    updateLog()
 
 
     Scaffold(
@@ -954,9 +1120,9 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(resultTime, resultDay, write, standby, onBackClick = { write = !write; standby = !standby;  },
+                    LogHeader(calendarInstance, resultTime, write, standby, onBackClick = { write = !write; standby = !standby;  },
                         onDoneClick = { standby = !standby; focusManager.clearFocus(); },
-                        onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- })
+                        onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- }, updateResultTime = :: updateResultTime)
                     //if(content == null || content == "") count--
 
                     if (count == 0) {
