@@ -55,6 +55,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -249,7 +250,7 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
 //        Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
 //    }
 
-    var resultTime by remember { mutableStateOf(resultTime) }
+
     Log.d("로그화면 resultTime", "resultTime: $resultTime")
 
 
@@ -261,20 +262,6 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
 
     var openDialog = remember { mutableStateOf(false) }
 
-
-
-//    CalendarDialog(
-//        state = calendarState,
-//        config = CalendarConfig(
-//            monthSelection = true,
-//            yearSelection = true,
-//            style = CalendarStyle.MONTH,
-//            //disabledDates = listOf(LocalDate.now().plusDays(7))
-//        ),
-//        selection = CalendarSelection.Date { date ->
-//            Log.d("SelectedDate", "$date")
-//        }
-//    )
 
 
     // 데이트 피커 세팅
@@ -934,6 +921,8 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 //        mutableStateOf(calendarInstance)
 //    }
     var count by remember { mutableStateOf(0) }
+
+
     var standby by remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -968,8 +957,17 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
         Log.d("ResultTimeDebug", "Updated resultTime: $resultTime")
     }
 
+    var isContentListLoaded = remember { mutableStateOf(false) }
 
-    fun updateLog() {
+
+    LaunchedEffect(resultTime) {
+
+        //existList = mutableStateListOf<Boolean>()
+
+        contentList.clear()
+        isContentListLoaded.value = false
+
+
         coroutineScope.launch {
             Log.d("로그화면 클릭", "")
             Log.d("로그화면 클릭", "$resultTime")
@@ -1073,11 +1071,13 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 Log.d("로그 오류", "$e")
             }
 
-
         }
+
     }
 
-    updateLog()
+
+    updateResultTime()
+    count = contentList.size
 
 
     Scaffold(
@@ -1088,7 +1088,6 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
             if (write == false) {
                 LogFloatingActionButton(count) {
                     write = !write   // 클릭 후에 버튼을 숨김
-                    count++
                     Log.d("floatingActionButtonClick", "count: $count")
                 }
             }
@@ -1186,8 +1185,6 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
                         }
                     }
-
-
 
                 }
             }
