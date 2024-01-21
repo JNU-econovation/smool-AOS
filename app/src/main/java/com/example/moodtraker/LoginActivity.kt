@@ -161,6 +161,19 @@ data class DiaryContent(
 )
 
 
+// 일기 작성
+data class DiaryPost(
+    val localDate: String,
+    val userPk : Int,
+    val content : String,
+    val happiness: Int,
+    val gloom: Int,
+    val anxiety: Int,
+    val stress: Int,
+    val sleep: Int
+)
+
+
 
 
 object RetrofitInstance {
@@ -253,7 +266,10 @@ interface MyApi {
         @Path("date") date: String
     ) : Response<LogResponse>
 
-    
+
+    // 일기 작성 화면
+    @POST("/diaries")
+    suspend fun write(@Body post: DiaryPost) : Response<BaseResponse>
 
 }
 
