@@ -101,16 +101,22 @@ fun GraphScreen(){
         val time = remember {
             mutableStateOf(calendarInstance)
         }
+        val timeYear = remember {
+            mutableStateOf(calendarInstance)
+        }
 
-        Column() {
+        Column {
             Spacer(modifier = Modifier.height(20.dp))
-            Icon(Icons.Default.HelpOutline, contentDescription = "help",tint = Color.White,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(end = 16.dp))
+//            Icon(Icons.Default.HelpOutline, contentDescription = "help",tint = Color.White,
+//                modifier = Modifier
+//                    .align(Alignment.End)
+//                    .padding(end = 16.dp))
             ChartHeader(time)
-            //ComposedChart()
-            testChart()
+            monthChart()
+            Spacer(modifier = Modifier.height(20.dp))
+            ChartHeaderYear(timeYear)
+            yearChart()
+            Spacer(modifier = Modifier.height(20.dp))
 
         }
 
@@ -173,82 +179,112 @@ fun ChartHeader(date: MutableState<Calendar>){
     }
 }
 
+@Composable
+fun ChartHeaderYear(date: MutableState<Calendar>){
+    val resultTime = SimpleDateFormat("yyyy년", Locale.KOREA).format(date.value.time)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 30.dp, end = 30.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+
+    ) {
+        Button(
+            onClick = {
+                val newDate = Calendar.getInstance()
+                newDate.time = date.value.time
+                newDate.add(Calendar.YEAR, -1)
+                date.value = newDate
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )
+
+        ) {
+            Text(
+                text = "<",
+                fontSize = 28.sp
+            )
+        }
+
+        Text(
+            text = resultTime,
+            fontSize = 24.sp,
+            color = Color.White
+        )
+
+
+        Button(
+            onClick = {
+                val newDate = Calendar.getInstance()
+                newDate.time = date.value.time
+                newDate.add(Calendar.YEAR, +1)
+                date.value = newDate
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )) {
+            Text(
+                text = ">",
+                fontSize = 28.sp
+            )
+        }
+    }
+}
+
+
+
+
+
 //@Composable
 //fun ComposedChart() {
+//
 //
 //    val composedChartEntryModelProducer = ComposedChartEntryModelProducer.build {
 //        add(entriesOf(9, 10, 1, 2, 3, 4, 5, 6, 2, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 10))
 //        add(entriesOf(10, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 12, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 10, 6))
-//        add(entriesOf(10, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 12, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 10, 6))
-//        add(entriesOf(10, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 12, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 10, 6))
-//        add(entriesOf(10, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 12, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 10, 6))
+//        add(entriesOf(1, 2, 3, 4 ,5 , 6, 7, 8, 9))
+//        add(entriesOf(5, 0, 10, 7, 2, 3, 7, 3, 4, 4, 4, 4, 4, 5))
+//        add(entriesOf(5, 5, 5, 5, 5, 5, 5 ,5 ,5, 5, 10, 10, 10, 10))
 //
 //    }
 //
+//
 //    var sleepChart = columnChart()
-//    var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color.Red, )))
-//    var gloomChart = lineChart(lines = listOf(lineSpec(lineColor = Color.Blue)))
-//    var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color.Green)))
-//    var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color.Gray)))
-//    val composedChart = remember(sleepChart, happyChart, gloomChart, anxietyChart, stressChart) { sleepChart + happyChart + gloomChart + anxietyChart + stressChart }
+//    var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFE16F6F)))) // 핑크
+//    var gloomChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB3F4FD)))) // 하늘
+//    var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFF8FA93)))) // 노랑
+//    var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFF97F98F)))) // 초록
+//
+//    //val composedChart = remember(sleepChart, happyChart, gloomChart, anxietyChart, stressChart) { sleepChart + happyChart + gloomChart + anxietyChart + stressChart }
+//    val composedChart = remember(
+//        sleepChart,
+//        happyChart,
+//        gloomChart,
+//        anxietyChart,
+//        stressChart
+//    ) {
+//        sleepChart + happyChart + gloomChart + anxietyChart + stressChart
+//    }
+//
+//
 //
 //    Chart(
-//        //chart = remember(sleepChart, happyChart) { sleepChart + happyChart },
+//
 //        chart = composedChart,
 //        chartModelProducer = composedChartEntryModelProducer,
 //        startAxis = rememberStartAxis(),
 //        bottomAxis = rememberBottomAxis(),
 //        chartScrollState = rememberChartScrollState(),
+//        modifier = Modifier.height(250.dp)
+//
 //    )
+//
+//    Log.d("ComposedChart", "Sleep Chart Data: ${composedChartEntryModelProducer.getModel()}")
+//
 //}
-
-@Composable
-fun ComposedChart() {
-
-
-    val composedChartEntryModelProducer = ComposedChartEntryModelProducer.build {
-        add(entriesOf(9, 10, 1, 2, 3, 4, 5, 6, 2, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 10))
-        add(entriesOf(10, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 12, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 10, 6))
-        add(entriesOf(1, 2, 3, 4 ,5 , 6, 7, 8, 9))
-        add(entriesOf(5, 0, 10, 7, 2, 3, 7, 3, 4, 4, 4, 4, 4, 5))
-        add(entriesOf(5, 5, 5, 5, 5, 5, 5 ,5 ,5, 5, 10, 10, 10, 10))
-
-    }
-
-
-    var sleepChart = columnChart()
-    var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFE16F6F)))) // 핑크
-    var gloomChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB3F4FD)))) // 하늘
-    var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFF8FA93)))) // 노랑
-    var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFF97F98F)))) // 초록
-
-    //val composedChart = remember(sleepChart, happyChart, gloomChart, anxietyChart, stressChart) { sleepChart + happyChart + gloomChart + anxietyChart + stressChart }
-    val composedChart = remember(
-        sleepChart,
-        happyChart,
-        gloomChart,
-        anxietyChart,
-        stressChart
-    ) {
-        sleepChart + happyChart + gloomChart + anxietyChart + stressChart
-    }
-
-
-
-    Chart(
-
-        chart = composedChart,
-        chartModelProducer = composedChartEntryModelProducer,
-        startAxis = rememberStartAxis(),
-        bottomAxis = rememberBottomAxis(),
-        chartScrollState = rememberChartScrollState(),
-        modifier = Modifier.height(250.dp)
-
-    )
-
-    Log.d("ComposedChart", "Sleep Chart Data: ${composedChartEntryModelProducer.getModel()}")
-
-}
 
 
 
@@ -287,7 +323,7 @@ fun rememberChartStyle(columnChartColors: List<Color>): ChartStyle {
 }
 
 @Composable
-fun testChart() {
+fun monthChart() {
 
     val maxYRange = 10
 
@@ -362,6 +398,85 @@ fun testChart() {
         )
     }
 }
+
+
+@Composable
+fun yearChart() {
+
+    val maxYRange = 10
+
+    val colorList = listOf(Color(0xFF3E3B79), Color(0xFFE16F6F), Color(0xFFB3F4FD), Color(0xFFF8FA93), Color(0xFF97F98F))
+
+
+    ProvideChartStyle(rememberChartStyle(listOf(Color.White))) {
+
+        val composedChartEntryModelProducer = ComposedChartEntryModelProducer.build {
+            add(entriesOf(9, 9, 1, 2, 3, 4, 5, 6, 2, 8, 1, 2))
+            add(entriesOf(9, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 9))
+            add(entriesOf(1, 2, 3, 4 ,5, 6, 7, 8, 9, 7, 6, 7))
+            add(entriesOf(5, 0, 9, 7, 2, 3, 7, 3, 4, 4, 4, 5))
+            add(entriesOf(5, 5, 5, 5, 5, 5, 5, 5, 9, 9, 9, 9))
+
+        }
+
+
+        var sleepChart = columnChart(
+            mergeMode = ColumnChart.MergeMode.Grouped,
+            axisValuesOverrider = AxisValuesOverrider.fixed(
+                minY = 0f,
+                maxY = maxYRange.toFloat()
+            ),
+            spacing = 0.dp
+        )
+        var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFE16F6F)))) // 핑크
+        var gloomChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB3F4FD)))) // 하늘
+        var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFF8FA93)))) // 노랑
+        var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFF97F98F)))) // 초록
+
+        //val composedChart = remember(sleepChart, happyChart, gloomChart, anxietyChart, stressChart) { sleepChart + happyChart + gloomChart + anxietyChart + stressChart }
+        val composedChart = remember(
+            sleepChart,
+            happyChart,
+            gloomChart,
+            anxietyChart,
+            stressChart
+        ) {
+            sleepChart + happyChart + gloomChart + anxietyChart + stressChart
+        }
+
+
+        Chart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .padding(horizontal = 15.dp, vertical = 5.dp),
+            chart = composedChart,
+            legend = rememberLegend(colors = colorList),
+            chartModelProducer = composedChartEntryModelProducer,
+            startAxis = rememberStartAxis(
+                itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = maxYRange / 10 + 1)
+            ),
+//            endAxis = rememberEndAxis(
+//                //itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = maxYRange / 10 + 1)
+//                itemPlacer = AxisItemPlacer.Vertical.default(maxItemCount = 0)
+//            ),
+            bottomAxis = rememberBottomAxis(
+                valueFormatter = { value, _ ->
+                    ("${value.toInt()+1}")
+//                    val intValue = value.toInt() + 1
+//                    if (intValue % 5 == 0 && intValue <= 30) {
+//                        ("${value.toInt()+1}")
+//                    } else {
+//                        ""
+//                    }
+                }
+            ),
+            runInitialAnimation = true,
+            chartScrollState = rememberChartScrollState()
+        )
+    }
+}
+
 
 @Composable
 fun rememberLegend(colors: List<Color>): HorizontalLegend {
