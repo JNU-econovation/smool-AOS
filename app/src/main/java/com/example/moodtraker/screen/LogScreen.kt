@@ -866,29 +866,33 @@ fun SliderWithLabel(
 
 
 @Composable
-fun LogDiary(content: String) {
+fun LogDiary(contentList : MutableState<List<String>>) {
 
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp)
+    for (i in 0 until contentList.value.size) {
+
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
 //                    .background(
 //                        color = Color.Transparent,
 //                        shape = RoundedCornerShape(8.dp)
 //                    )
-        .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
-        //.clickable { onToggle() }
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+            .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
+            //.clickable { onToggle() }
         ) {
-            Text(
-                text = "${content}",
-                color = Color.White
-            )
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "${contentList.value[i]}",
+                    color = Color.White
+                )
 
+
+            }
 
         }
-            
+
     }
 
 }
@@ -1161,7 +1165,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
                             if (content != "" || content != null) {
                                 Log.d("로그 content", "content: $content")
-                                LogDiary(content)
+                                LogDiary(remember { mutableStateOf(contentList) })
                             }
                         }
 
