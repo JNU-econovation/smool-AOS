@@ -73,6 +73,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.moodtraker.DiaryPost
 import com.example.moodtraker.R
 import com.example.moodtraker.UserPK
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
@@ -217,7 +218,7 @@ fun extractYearAndMonthAndDay(dateString: String): List<Int> {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, standby:Boolean,
+fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, standby:Boolean, detail: Boolean,
               onBackClick: () -> Unit, onDoneClick: () -> Unit, onMenuClick: () -> Unit, onModify: () -> Unit, onDelete: () -> Unit, updateResultTime: () -> Unit){
 
 //    // 날짜 추출
@@ -279,7 +280,7 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
 
 
 
-    if (write == true) {
+    if (write == true || detail == true) {
 
         Row(
             modifier = Modifier
@@ -868,28 +869,32 @@ fun SliderWithLabel(
 
 
 @Composable
-fun LogDiary(contentList : MutableState<List<String>>) {
+fun LogDiary(contentList : MutableState<List<String>>, onDetail: (String) -> Unit) {
 
     for (i in 0 until contentList.value.size) {
 
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
+        if (contentList.value[i] != null && contentList.value[i]!="") {
+
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
 //                    .background(
 //                        color = Color.Transparent,
 //                        shape = RoundedCornerShape(8.dp)
 //                    )
-            .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
-            //.clickable { onToggle() }
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
+                .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
+                .clickable { onDetail(contentList.value[i]) }
             ) {
-                Text(
-                    text = "${contentList.value[i]}",
-                    color = Color.White
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "${contentList.value[i]}",
+                        color = Color.White
+                    )
 
+
+                }
 
             }
 
@@ -899,6 +904,43 @@ fun LogDiary(contentList : MutableState<List<String>>) {
 
 }
 
+
+fun DataSet(resultTime: String): String {
+
+    // 통신 데이터 가공
+    val yearAndMonth = extractYearAndMonthAndDay(resultTime.toString())
+    Log.d("로그화면 yearMonthDay", "yearAndMonth: $yearAndMonth")
+    val year = yearAndMonth[0]
+    val month = yearAndMonth[1]
+    val day = yearAndMonth[2]
+    var dayString = ""
+    var monthString = ""
+    var tmp = ""
+
+    if (day < 10 || month < 10) {
+        if (day < 10 && month < 10) {
+            dayString = "0" + day.toString()
+            monthString = "0" + month.toString()
+        } else {
+            if (day < 10) {
+                dayString = "0" + day.toString()
+                monthString = month.toString()
+            }
+            if (month < 10) {
+                monthString = "0" + month.toString()
+                dayString = day.toString()
+            }
+        }
+
+        tmp = "$year-$monthString-$dayString"
+    } else {
+        tmp = "$year-$month-$day"
+    }
+
+    Log.d("로그화면 tmp", "tmp: $tmp")
+
+    return tmp
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -917,14 +959,20 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 //        mutableStateOf(calendarInstance)
 //    }
     var count by remember { mutableStateOf(0) }
-
+    var contentSize by remember { mutableStateOf(0) }
 
     var standby by remember { mutableStateOf(false) }
+    var update by remember { mutableStateOf(false) }
+    var detail by remember { mutableStateOf(false) }
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
+
     var content by remember { mutableStateOf("") }
+    var realContent by remember { mutableStateOf("") }
+    var tmpContent by remember { mutableStateOf("") }
+    var detailContent by remember { mutableStateOf("") }
 
     var contentList = remember { mutableStateListOf<String>() }
 
@@ -964,10 +1012,13 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
     var isContentListLoaded = remember { mutableStateOf(false) }
 
 
+
+
+
     LaunchedEffect(resultTime) {
 
-        //existList = mutableStateListOf<Boolean>()
-
+        content = ""
+        realContent = ""
         contentList.clear()
         isContentListLoaded.value = false
 
@@ -976,39 +1027,9 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
             Log.d("로그화면 클릭", "")
             Log.d("로그화면 클릭", "$resultTime")
 
+            var tmp = DataSet(resultTime)
+            Log.d("로그화면 DataSet 함수", "tmp: $tmp")
 
-            // 통신 데이터 가공
-
-            val yearAndMonth = extractYearAndMonthAndDay(resultTime.toString())
-            Log.d("로그화면 yearMonthDay", "yearAndMonth: $yearAndMonth")
-            val year = yearAndMonth[0]
-            val month = yearAndMonth[1]
-            val day = yearAndMonth[2]
-            var dayString = ""
-            var monthString = ""
-            var tmp = ""
-
-            if (day < 10 || month < 10) {
-                if (day < 10 && month < 10) {
-                    dayString = "0" + day.toString()
-                    monthString = "0" + month.toString()
-                } else {
-                    if (day < 10) {
-                        dayString = "0" + day.toString()
-                        monthString = month.toString()
-                    }
-                    if (month < 10) {
-                        monthString = "0" + month.toString()
-                        dayString = day.toString()
-                    }
-                }
-
-                tmp = "$year-$monthString-$dayString"
-            } else {
-                tmp = "$year-$month-$day"
-            }
-
-            Log.d("로그화면 tmp", "tmp: $tmp")
 
 
             val logRequest =
@@ -1049,13 +1070,19 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                         val diaryPk = diaryExist.diaryPk
                         val content = diaryExist.content
 
-                        contentList.add(content)
+                        if (content != "" || content != null) {
+                            Log.d("로그화면 contentList 1", "contentList: $contentList")
+                            contentList.add(content)
+                            Log.d("로그화면 contentList 2", "contentList: $contentList")
+                        }
 
                         Log.d("로그화면 상세 데이터", "$diaryPk $content")
                     }
 
                     Log.d("로그화면 contentList", "contentList: ${contentList.joinToString()}")
                     Log.d("로그화면 contentList", "contentList.size: ${contentList.size}")
+                    contentSize = contentList.size
+
 
 
                 }
@@ -1076,8 +1103,8 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
             }
 
         }
-
     }
+
 
 
     updateResultTime()
@@ -1092,6 +1119,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
             if (write == false) {
                 LogFloatingActionButton(count) {
                     write = !write   // 클릭 후에 버튼을 숨김
+                    count++
                     Log.d("floatingActionButtonClick", "count: $count")
                 }
             }
@@ -1123,10 +1151,11 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(calendarInstance, resultTime, write, standby, onBackClick = { write = !write; standby = !standby;  },
-                        onDoneClick = { standby = !standby; focusManager.clearFocus(); },
+                    LogHeader(calendarInstance, resultTime, write, standby, detail, onBackClick = { write = !write; standby = !standby; },
+                        onDoneClick = { standby = !standby; focusManager.clearFocus(); update = !update },
                         onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- }, updateResultTime = :: updateResultTime)
                     //if(content == null || content == "") count--
+                    Log.d("로그화면 update LogHeader 밑", "update: $update")
 
 
                     if (count == 0) {
@@ -1160,6 +1189,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                     }
                     else {
 
+
                         // 작성화면 여부와 관계없이 count 값이 1 이상이면 emotionBox()는 동일
                         //emotionBox(happiness, gloom, anxiety, stress, sleep)
                         emotionBox(remember { mutableStateOf(happiness) }, remember { mutableStateOf(gloom) }, remember { mutableStateOf(anxiety) }, remember { mutableStateOf(stress) }, remember { mutableStateOf(sleep) })
@@ -1167,17 +1197,25 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
                         if (write == false) {   // 작성화면이 아닐때
 
-                            if (content != "" || content != null) {
-                                Log.d("로그 content", "content: $content")
+                            Log.d("로그화면 content", "content: $content")
+                            realContent = content
+                            Log.d("로그화면 realContent", "realContent: $realContent")
 
+                            if (detail == false) {
                                 Column(modifier = Modifier.verticalScroll(scrollState)) {
-                                    LogDiary(remember { mutableStateOf(contentList) })
+                                    LogDiary(remember { mutableStateOf(contentList) }, onDetail = { content ->
+                                        detailContent = content; detail = !detail
+                                    })
                                 }
-
+                            } else {
+                                LogStandby(detailContent)
                             }
+
+
                         }
 
                         else {  // 작성화면일때
+
 
                             if (keyboardController != null) {
                                 Log.d("click", "standby: $standby")
@@ -1188,17 +1226,77 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                                         },
 
                                     )
+                                    tmpContent = content
                                 }
                                 else {
 
-                                    Column(modifier = Modifier.verticalScroll(scrollState)) {
-                                        LogStandby(content)
-                                    }
+                                    LogStandby(tmpContent)
+
+
 
                                 }
                             }
 
                         }
+
+
+                        LaunchedEffect(realContent) {
+
+                            coroutineScope.launch {
+
+                                var tmp = DataSet(resultTime)
+                                Log.d("로그화면 DataSet 함수", "tmp: $tmp")
+
+                                if (realContent != "" && realContent != null) {
+                                    Log.d("로그화면 realContent", "realContent: $realContent")
+
+                                    val diaryRequest =
+                                        DiaryPost(
+                                            localDate = tmp, userPk = userPk, content = realContent, happiness = happiness, gloom = gloom, anxiety = anxiety, stress = stress, sleep = sleep
+                                        )
+                                    Log.d("로그화면 request", "$diaryRequest")
+
+                                    try {
+
+                                        Log.d("로그화면 1111", "1111")
+                                        val response = myApi.write(diaryRequest)
+                                        Log.d("로그화면 response.body", "${response.body()}")
+                                        Log.d("로그화면 응답 코드", "HTTP status code: ${response.code()}")
+                                        Log.d("로그화면 응답 성공 여부", "Is successful: ${response.isSuccessful}")
+
+
+                                        if (response.isSuccessful) {
+
+                                            Log.d("로그화면 response", "response is successful")
+
+                                            val json = response.body()
+                                            Log.d("로그화면 json", "$json")
+                                            val status = json?.status
+                                            val message = json?.message
+                                            Log.d("로그화면 데이터 셋", "$status $message")
+
+
+                                        } else {
+                                            val errorMessage = response.errorBody()?.string()
+                                            Log.d("로그화면 오류 메시지", "Error message: $errorMessage")
+                                            val jsonObject = JSONObject(errorMessage)
+                                            val status = jsonObject.getInt("status")
+                                            val message = jsonObject.getString("message")
+                                            Log.d("로그화면 오류 상태 코드", "Error status: $status")
+                                            Log.d("로그화면 오류 메시지", "Error message: $message")
+                                        }
+
+
+                                    } catch (e: Exception) {
+                                        Log.d("로그화면 오류", "$e")
+                                    }
+
+
+                                }
+                            }
+
+                        }
+
                     }
 
                 }
@@ -1213,6 +1311,9 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
 @Composable
 fun LogStandby(content: String) {
+
+    val scrollState = rememberScrollState()
+
     Box(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)
@@ -1225,11 +1326,18 @@ fun LogStandby(content: String) {
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
+
         ) {
-            Text(
-                text = "${content}",
-                color = Color.White
-            )
+
+            Column(modifier = Modifier.verticalScroll(scrollState)) {
+
+                Text(
+                    text = "${content}",
+                    color = Color.White
+                )
+            }
+
+
 
 
         }
@@ -1240,6 +1348,7 @@ fun LogStandby(content: String) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LogTextField(onTextState: (String) -> Unit){
+
 
     var textState by remember { mutableStateOf("") }
     var enteredText by remember { mutableStateOf("")}
@@ -1265,39 +1374,19 @@ fun LogTextField(onTextState: (String) -> Unit){
         shape = RoundedCornerShape(16.dp),
 
 
-//        keyboardActions = KeyboardActions(
-//            onDone = {
-//                onDoneClick()
-//                keyboardController?.hide() // 키보드 숨기기
-//            }
-//        )
+    )
 
-        //cursorBrush = SolidColor(Color.White), // 커서 색상 변경
-
-//        keyboardActions = KeyboardActions(
-//            onDone = {
-//                // 이 부분에서 키보드의 Done 버튼을 눌렀을 때의 동작을 설정할 수 있습니다.
+//    Button(
+//        onClick = {
+//            enteredText = textState
+//        }
+//    ) {
 //
-//            }
-//        ),
-
-        //interactionSource = remember { MutableInteractionSource() },
-
-    )
-
-
-
-    Button(
-        onClick = {
-            enteredText = textState
-        }
-    ) {
-
-    }
-
-    Text(
-        text = "${enteredText}"
-    )
+//    }
+//
+//    Text(
+//        text = "${enteredText}"
+//    )
 
 
 }
