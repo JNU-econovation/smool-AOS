@@ -25,7 +25,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -903,6 +905,7 @@ fun LogDiary(contentList : MutableState<List<String>>) {
 fun LogScaffold(resultTime: String?, resultDay: Int?){
 
     val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
     val userPk = user.userPk
     Log.d("로그화면 로그인 userPk", "userPk: $userPk")
@@ -1125,6 +1128,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                         onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- }, updateResultTime = :: updateResultTime)
                     //if(content == null || content == "") count--
 
+
                     if (count == 0) {
                         Box(
                             contentAlignment = Alignment.Center,
@@ -1165,7 +1169,11 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
                             if (content != "" || content != null) {
                                 Log.d("로그 content", "content: $content")
-                                LogDiary(remember { mutableStateOf(contentList) })
+
+                                Column(modifier = Modifier.verticalScroll(scrollState)) {
+                                    LogDiary(remember { mutableStateOf(contentList) })
+                                }
+
                             }
                         }
 
@@ -1182,7 +1190,11 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                                     )
                                 }
                                 else {
-                                    LogStandby(content)
+
+                                    Column(modifier = Modifier.verticalScroll(scrollState)) {
+                                        LogStandby(content)
+                                    }
+
                                 }
                             }
 
