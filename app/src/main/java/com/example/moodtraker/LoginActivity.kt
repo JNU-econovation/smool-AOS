@@ -166,7 +166,7 @@ data class DiaryContent(
 object RetrofitInstance {
     val BASE_URL = "http://192.168.0.251:8080"
 
-    
+
     fun getInstance() : Retrofit {
 
         return retrofit
@@ -247,10 +247,10 @@ interface MyApi {
 
 
     // 로그 화면
-    @GET("calendar/date/{date}")
+    @GET("calendar/{userPk}/date/{date}")
     suspend fun log(
-        @Path("date") date: String,
-        @Body userPk: UserPK
+        @Path("userPk") userPk: Int,
+        @Path("date") date: String
     ) : Response<LogResponse>
 
     
