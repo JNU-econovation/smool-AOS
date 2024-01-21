@@ -174,6 +174,46 @@ data class DiaryPost(
 )
 
 
+// 통계
+data class GraphResponse(
+    val status : Int,
+    val message : String,
+    val data : EmotionList
+)
+
+data class EmotionList(
+    val happiness: List<HappinessList>,
+    val gloom: List<GloomList>,
+    val anxiety: List<AnxietyList>,
+    val stress: List<StressList>,
+    val sleep: List<SleepList>
+)
+
+data class HappinessList(
+    val localDate: String,
+    val value: Int
+)
+
+data class GloomList(
+    val localDate: String,
+    val value: Int
+)
+
+data class AnxietyList(
+    val localDate: String,
+    val value: Int
+)
+
+data class StressList(
+    val localDate: String,
+    val value: Int
+)
+
+data class SleepList(
+    val localDate: String,
+    val value: Int
+)
+
 
 
 object RetrofitInstance {
@@ -268,8 +308,17 @@ interface MyApi {
 
 
     // 일기 작성 화면
-    @POST("/diaries")
+    @POST("diaries")
     suspend fun write(@Body post: DiaryPost) : Response<BaseResponse>
+
+    // 통계
+    @GET("emotion/{userPk}/statistics/{dates}")
+    suspend fun graph(
+        @Path("userPk") userPk: Int,
+        @Path("dates") dates: String
+    ) : Response<GraphResponse>
+
+
 
 }
 

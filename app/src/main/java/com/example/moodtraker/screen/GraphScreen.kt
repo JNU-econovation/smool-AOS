@@ -22,9 +22,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -34,7 +38,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.moodtraker.AnxietyList
+import com.example.moodtraker.GloomList
+import com.example.moodtraker.UserPK
 import com.example.moodtraker.ui.theme.MoodtrakerTheme
+import com.example.moodtraker.user
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberEndAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
@@ -77,6 +85,8 @@ import com.patrykandpatrick.vico.core.legend.HorizontalLegend
 import com.patrykandpatrick.vico.core.legend.Legend
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -97,6 +107,10 @@ fun GraphScreen(){
             )
     ) {
 
+        val coroutineScope = rememberCoroutineScope()
+
+        val userPk = user.userPk
+
         val calendarInstance = Calendar.getInstance()
         val time = remember {
             mutableStateOf(calendarInstance)
@@ -105,14 +119,160 @@ fun GraphScreen(){
             mutableStateOf(calendarInstance)
         }
 
+        val resultTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(time.value.time)
+
+        var happinessList = remember { mutableStateListOf<Int>() }
+        var gloomList = remember { mutableStateListOf<Int>() }
+        var anxietyList = remember { mutableStateListOf<Int>() }
+        var stressList = remember { mutableStateListOf<Int>() }
+        var sleepList = remember { mutableStateListOf<Int>() }
+
+
+
+        LaunchedEffect(resultTime) {
+
+            //existList = mutableStateListOf<Boolean>()
+
+            happinessList.clear()
+            gloomList.clear()
+            anxietyList.clear()
+            stressList.clear()
+            sleepList.clear()
+
+
+            Log.d("통계 업데이트", "resultLog: $resultTime")
+            var resultLog = SimpleDateFormat("yyyy-MM", Locale.KOREA).format(time.value.time)
+            var dayMax = time.value.getActualMaximum(Calendar.DAY_OF_MONTH)
+            var tmp = "$resultLog-$dayMax"
+            Log.d("캘린더 tmp", "$tmp")
+
+
+            coroutineScope.launch {
+                Log.d("통계 클릭", "")
+
+
+
+                val graphRequest =
+                    UserPK(userPk = userPk)
+                Log.d("통계 request", "$graphRequest")
+
+
+                try {
+
+                    Log.d("통계 1111", "1111")
+                    val response = myApi.graph(graphRequest.userPk, tmp)
+                    Log.d("통계 response.body", "${response.body()}")
+                    Log.d("통계 응답 코드", "HTTP status code: ${response.code()}")
+                    Log.d("통계 응답 성공 여부", "Is successful: ${response.isSuccessful}")
+
+
+                    if(response.isSuccessful) {
+
+                        Log.d("통계 response", "response is successful")
+
+                        val json = response.body()
+                        Log.d("통계 json", "$json")
+                        val status = json?.status
+                        val message = json?.message
+                        val data = json?.data
+                        val happiness = data?.happiness
+                        val gloom = data?.gloom
+                        val anxiety = data?.anxiety
+                        val stress = data?.stress
+                        val sleep = data?.sleep
+
+                        Log.d("통계 데이터", "$status $message $data")
+
+                        happiness?.forEach { emotion ->
+                            val localDate = emotion.localDate
+                            val value = emotion.value
+
+                            happinessList.add(value)
+
+                            Log.d("통계 상세 데이터", "$happinessList")
+                        }
+
+                        gloom?.forEach { emotion ->
+                            val localDate = emotion.localDate
+                            val value = emotion.value
+
+                            gloomList.add(value)
+
+                            Log.d("통계 상세 데이터", "$gloomList")
+                        }
+
+                        anxiety?.forEach { emotion ->
+                            val localDate = emotion.localDate
+                            val value = emotion.value
+
+                            anxietyList.add(value)
+
+                            Log.d("통계 상세 데이터", "$anxietyList")
+                        }
+
+                        stress?.forEach { emotion ->
+                            val localDate = emotion.localDate
+                            val value = emotion.value
+
+                            stressList.add(value)
+
+                            Log.d("통계 상세 데이터", "$stressList")
+                        }
+
+                        sleep?.forEach { emotion ->
+                            val localDate = emotion.localDate
+                            val value = emotion.value
+
+                            sleepList.add(value)
+
+                            Log.d("통계 상세 데이터", "$sleepList")
+                        }
+
+
+                        Log.d("통계 happinessList", "happinessList: ${happinessList.joinToString()}")
+                        Log.d("통계 happinessList", "happinessList: ${happinessList.size}")
+                        Log.d("통계 gloomList", "gloomList: ${gloomList.joinToString()}")
+                        Log.d("통계 gloomList", "gloomList: ${gloomList.size}")
+                        Log.d("통계 anxietyList", "anxietyList: ${anxietyList.joinToString()}")
+                        Log.d("통계 anxietyList", "anxietyList: ${anxietyList.size}")
+                        Log.d("통계 stressList", "stressList: ${stressList.joinToString()}")
+                        Log.d("통계 stressList", "stressList: ${stressList.size}")
+                        Log.d("통계 sleepList", "sleepList: ${sleepList.joinToString()}")
+                        Log.d("통계 sleepList", "sleepList: ${sleepList.size}")
+
+
+
+                    }
+
+                    else {
+                        val errorMessage = response.errorBody()?.string()
+                        Log.d("통계 오류 메시지", "Error message: $errorMessage")
+                        val jsonObject = JSONObject(errorMessage)
+                        val status = jsonObject.getInt("status")
+                        val message = jsonObject.getString("message")
+                        Log.d("통계 오류 상태 코드", "Error status: $status")
+                        Log.d("통계 오류 메시지", "Error message: $message")
+                    }
+
+
+                }catch (e:Exception){
+                    Log.d("통계 오류", "$e")
+                }
+
+
+            }
+
+        }
+
+
         Column {
             Spacer(modifier = Modifier.height(20.dp))
 //            Icon(Icons.Default.HelpOutline, contentDescription = "help",tint = Color.White,
 //                modifier = Modifier
 //                    .align(Alignment.End)
 //                    .padding(end = 16.dp))
-            ChartHeader(time)
-            monthChart()
+            ChartHeader(time, resultTime)
+            monthChart(happinessList, gloomList, anxietyList, stressList, sleepList)
             Spacer(modifier = Modifier.height(20.dp))
             ChartHeaderYear(timeYear)
             yearChart()
@@ -125,8 +285,8 @@ fun GraphScreen(){
 }
 
 @Composable
-fun ChartHeader(date: MutableState<Calendar>){
-    val resultTime = SimpleDateFormat("yyyy년 MM월", Locale.KOREA).format(date.value.time)
+fun ChartHeader(date: MutableState<Calendar>, resultTime:String){
+
 
     Row(
         modifier = Modifier
@@ -323,7 +483,7 @@ fun rememberChartStyle(columnChartColors: List<Color>): ChartStyle {
 }
 
 @Composable
-fun monthChart() {
+fun monthChart(happinessList: SnapshotStateList<Int>, gloomList: SnapshotStateList<Int>, anxietyList: SnapshotStateList<Int>, stressList: SnapshotStateList<Int>, sleepList: SnapshotStateList<Int>) {
 
     val maxYRange = 10
 
@@ -333,11 +493,18 @@ fun monthChart() {
     ProvideChartStyle(rememberChartStyle(listOf(Color.White))) {
 
         val composedChartEntryModelProducer = ComposedChartEntryModelProducer.build {
-            add(entriesOf(9, 9, 1, 2, 3, 4, 5, 6, 2, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 9))
-            add(entriesOf(9, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 9, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 9, 6))
-            add(entriesOf(1, 2, 3, 4 ,5 , 6, 7, 8, 9))
-            add(entriesOf(5, 0, 9, 7, 2, 3, 7, 3, 4, 4, 4, 4, 4, 5))
-            add(entriesOf(5, 5, 5, 5, 5, 5, 5 ,5 ,5, 5, 9, 9, 9, 9))
+            //add(entriesOf(9, 9, 1, 2, 3, 4, 5, 6, 2, 8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 9))
+//            add(entriesOf(9, 8, 4, 5, 6, 7, 8, 9, 0, 6, 7, 9, 4, 8, 9, 0, 7, 6, 5, 4, 3, 2, 8, 7, 6, 7, 6, 9, 6))
+//            add(entriesOf(1, 2, 3, 4 ,5 , 6, 7, 8, 9))
+//            add(entriesOf(5, 0, 9, 7, 2, 3, 7, 3, 4, 4, 4, 4, 4, 5))
+//            add(entriesOf(5, 5, 5, 5, 5, 5, 5 ,5 ,5, 5, 9, 9, 9, 9))
+
+            add(entriesOf(*sleepList.map { it as Number }.toTypedArray()))
+            add(entriesOf(*happinessList.map { it as Number }.toTypedArray()))
+            add(entriesOf(*gloomList.map { it as Number }.toTypedArray()))
+            add(entriesOf(*anxietyList.map { it as Number }.toTypedArray()))
+            add(entriesOf(*stressList.map { it as Number }.toTypedArray()))
+
 
         }
 
