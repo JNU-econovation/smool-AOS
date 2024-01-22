@@ -73,6 +73,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.moodtraker.DiaryContent
 import com.example.moodtraker.DiaryPost
 import com.example.moodtraker.R
 import com.example.moodtraker.UserPK
@@ -766,6 +767,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     //Spacer(modifier = Modifier.width(10.dp))
                     EmotionSlider(initialValue = happiness) { emotion ->
                         happiness.value = emotion
+
                     }
                     //happy =
 
@@ -963,6 +965,10 @@ fun SliderWithLabel(
 @Composable
 fun LogDiary(contentList : MutableState<List<String>>, onDetail: (String) -> Unit) {
 
+//    todayDiaries?.forEach { diary ->
+//        println(diary.content) // 콘솔에 content 출력
+//    }
+
     for (i in 0 until contentList.value.size) {
 
         if (contentList.value[i] != null && contentList.value[i]!="") {
@@ -1063,6 +1069,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
     var detailContent by remember { mutableStateOf("") }
 
     var contentList = remember { mutableStateListOf<String>() }
+    val saveDiaries = remember { mutableStateListOf<DiaryContent>() }
 
 
     // 날짜 추출
@@ -1090,16 +1097,16 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
     }
 
     // 감정 변수
-    var happiness by remember { mutableStateOf(0) }
-    var gloom by remember { mutableStateOf(0) }
-    var anxiety by remember { mutableStateOf(0) }
-    var stress by remember { mutableStateOf(0) }
-    var sleep by remember { mutableStateOf(0) }
+    var happiness = remember { mutableStateOf(0) }
+    var gloom = remember { mutableStateOf(0) }
+    var anxiety = remember { mutableStateOf(0) }
+    var stress = remember { mutableStateOf(0) }
+    var sleep = remember { mutableStateOf(0) }
 
 
     var isContentListLoaded = remember { mutableStateOf(false) }
 
-
+    var key by remember { mutableStateOf(0) }
 
 
 
@@ -1143,12 +1150,12 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                     val message = json?.message
                     val data = json?.data
 
-                    happiness = data?.happiness!!.toInt()
-                    gloom = data?.gloom!!.toInt()
-                    anxiety = data?.anxiety!!.toInt()
-                    stress = data?.stress!!.toInt()
-                    sleep = data?.sleep!!.toInt()
-                    val todayDiaries = data?.todayDiaries
+                    happiness.value = data?.happiness!!.toInt()
+                    gloom.value = data?.gloom!!.toInt()
+                    anxiety.value = data?.anxiety!!.toInt()
+                    stress.value = data?.stress!!.toInt()
+                    sleep.value = data?.sleep!!.toInt()
+                    val todayDiaries = data?.todayDiaries!!
 
                     Log.d("로그화면 데이터 셋", "$status $message $data")
                     Log.d("로그화면 데이터 감정", "$happiness $gloom $anxiety $stress $sleep")
@@ -1277,8 +1284,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
 
                         // 작성화면 여부와 관계없이 count 값이 1 이상이면 emotionBox()는 동일
-                        //emotionBox(happiness, gloom, anxiety, stress, sleep)
-                        emotionBox(remember { mutableStateOf(happiness) }, remember { mutableStateOf(gloom) }, remember { mutableStateOf(anxiety) }, remember { mutableStateOf(stress) }, remember { mutableStateOf(sleep) })
+                        emotionBox(happiness, gloom, anxiety, stress, sleep)
 
 
                         if (write == false) {   // 작성화면이 아닐때
@@ -1289,20 +1295,21 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
                             if (detail == false) {
                                 Column(modifier = Modifier.verticalScroll(scrollState)) {
-                                    LogDiary(remember { mutableStateOf(contentList) }, onDetail = { content ->
-                                        detailContent = content; detail = true; standby = true;
-                                    })
+                                    LogDiary(
+                                        remember { mutableStateOf(contentList) },
+                                        onDetail = { content ->
+                                            detailContent = content; detail = true; standby = true;
+                                        })
                                 }
                             } else {
-                                if(standby == false) {  // 글박스 상세보기에서 수정 버튼 클릭
+                                if (standby == false) {  // 글박스 상세보기에서 수정 버튼 클릭
 
                                     LogTextFieldMod(
                                         content = detailContent,
-                                        onTextState = {updatedTextState ->
+                                        onTextState = { updatedTextState ->
                                             content = updatedTextState
                                         },
                                     )
-
 
 
                                 } else {
@@ -1312,26 +1319,22 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                             }
 
 
-                        }
-
-                        else {  // 작성화면일때
+                        } else {  // 작성화면일때
 
 
                             if (keyboardController != null) {
                                 Log.d("click", "standby: $standby")
-                                if(standby == false) {
+                                if (standby == false) {
                                     LogTextField(
-                                        onTextState = {updatedTextState ->
+                                        onTextState = { updatedTextState ->
                                             content = updatedTextState
                                         },
 
-                                    )
+                                        )
                                     tmpContent = content
-                                }
-                                else {
+                                } else {
 
                                     LogStandby(tmpContent)
-
 
 
                                 }
@@ -1340,19 +1343,26 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                         }
 
 
-                        LaunchedEffect(realContent) {
+                        LaunchedEffect(realContent, happiness, gloom, anxiety, stress, sleep) {
 
                             coroutineScope.launch {
 
                                 var tmp = DataSet(resultTime)
                                 Log.d("로그화면 DataSet 함수", "tmp: $tmp")
 
-                                if (realContent != "" && realContent != null ) {
+                                if (realContent != "" && realContent != null) {
                                     Log.d("로그화면 realContent", "realContent: $realContent")
 
                                     val diaryRequest =
                                         DiaryPost(
-                                            localDate = tmp, userPk = userPk, content = realContent, happiness = happiness, gloom = gloom, anxiety = anxiety, stress = stress, sleep = sleep
+                                            localDate = tmp,
+                                            userPk = userPk,
+                                            content = realContent,
+                                            happiness = happiness.value,
+                                            gloom = gloom.value,
+                                            anxiety = anxiety.value,
+                                            stress = stress.value,
+                                            sleep = sleep.value
                                         )
                                     Log.d("로그화면 request", "$diaryRequest")
 
@@ -1362,7 +1372,10 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                                         val response = myApi.write(diaryRequest)
                                         Log.d("로그화면 response.body", "${response.body()}")
                                         Log.d("로그화면 응답 코드", "HTTP status code: ${response.code()}")
-                                        Log.d("로그화면 응답 성공 여부", "Is successful: ${response.isSuccessful}")
+                                        Log.d(
+                                            "로그화면 응답 성공 여부",
+                                            "Is successful: ${response.isSuccessful}"
+                                        )
 
 
                                         if (response.isSuccessful) {
