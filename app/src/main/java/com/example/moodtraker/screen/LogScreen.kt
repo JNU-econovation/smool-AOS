@@ -1109,6 +1109,8 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
     var key by remember { mutableStateOf(0) }
 
+    var todayDiaries = remember { listOf<DiaryContent>() }
+
 
 
     LaunchedEffect(resultTime) {
@@ -1156,7 +1158,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                     anxiety.value = data?.anxiety!!.toInt()
                     stress.value = data?.stress!!.toInt()
                     sleep.value = data?.sleep!!.toInt()
-                    val todayDiaries = data?.todayDiaries!!
+                    todayDiaries = data?.todayDiaries!!
 
                     Log.d("로그화면 데이터 셋", "$status $message $data")
                     Log.d("로그화면 데이터 감정", "$happiness $gloom $anxiety $stress $sleep")
@@ -1404,6 +1406,82 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                                     } catch (e: Exception) {
                                         Log.d("로그화면 오류", "$e")
                                     }
+
+                                    // 다시 요청 받기
+
+                                    val logRequest =
+                                        UserPK(userPk = userPk)
+                                    Log.d("로그화면 request", "$logRequest")
+
+                                    try {
+
+                                        Log.d("로그화면 1111", "1111")
+                                        val response = myApi.log(logRequest.userPk, tmp)
+                                        Log.d("로그화면 response.body", "${response.body()}")
+                                        Log.d("로그화면 응답 코드", "HTTP status code: ${response.code()}")
+                                        Log.d("로그화면 응답 성공 여부", "Is successful: ${response.isSuccessful}")
+
+
+                                        if(response.isSuccessful) {
+
+                                            Log.d("로그화면 response", "response is successful")
+
+                                            val json = response.body()
+                                            Log.d("로그화면 json", "$json")
+                                            val status = json?.status
+                                            val message = json?.message
+                                            val data = json?.data
+
+                                            happiness.value = data?.happiness!!.toInt()
+                                            gloom.value = data?.gloom!!.toInt()
+                                            anxiety.value = data?.anxiety!!.toInt()
+                                            stress.value = data?.stress!!.toInt()
+                                            sleep.value = data?.sleep!!.toInt()
+                                            todayDiaries = data?.todayDiaries!!
+
+                                            Log.d("로그화면 데이터 셋", "$status $message $data")
+                                            Log.d("로그화면 데이터 감정", "$happiness $gloom $anxiety $stress $sleep")
+                                            Log.d("로그화면 데이터 일기 리스트", "$todayDiaries")
+
+                                            contentList.clear()
+
+                                            todayDiaries?.forEach { diaryExist ->
+                                                val diaryPk = diaryExist.diaryPk
+                                                val content = diaryExist.content
+
+                                                if (content != "" || content != null) {
+                                                    Log.d("로그화면 contentList 1", "contentList: $contentList")
+                                                    contentList.add(content)
+                                                    Log.d("로그화면 contentList 2", "contentList: $contentList")
+                                                }
+
+                                                Log.d("로그화면 상세 데이터", "$diaryPk $content")
+                                            }
+
+                                            Log.d("로그화면 contentList", "contentList: ${contentList.joinToString()}")
+                                            Log.d("로그화면 contentList", "contentList.size: ${contentList.size}")
+
+
+
+
+                                        }
+
+                                        else {
+                                            val errorMessage = response.errorBody()?.string()
+                                            Log.d("로그화면 오류 메시지", "Error message: $errorMessage")
+                                            val jsonObject = JSONObject(errorMessage)
+                                            val status = jsonObject.getInt("status")
+                                            val message = jsonObject.getString("message")
+                                            Log.d("로그화면 오류 상태 코드", "Error status: $status")
+                                            Log.d("로그화면 오류 메시지", "Error message: $message")
+                                        }
+
+
+                                    }catch (e:Exception){
+                                        Log.d("로그 오류", "$e")
+                                    }
+
+
 
 
                                 }
