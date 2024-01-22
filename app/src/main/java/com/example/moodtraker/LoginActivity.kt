@@ -174,6 +174,25 @@ data class DiaryPost(
 )
 
 
+// 일기 읽기
+data class DiaryResponse(
+    val status : Int,
+    val message : String,
+    val data : DiaryGet
+)
+
+data class DiaryGet(
+    val content : String,
+    val happiness : Int,
+    val gloom : Int,
+    val anxiety : Int,
+    val stress : Int,
+    val sleep : Int
+)
+
+
+
+
 // 통계
 data class GraphResponse(
     val status : Int,
@@ -310,6 +329,13 @@ interface MyApi {
     // 일기 작성 화면
     @POST("diaries")
     suspend fun write(@Body post: DiaryPost) : Response<BaseResponse>
+
+
+    // 일기 읽기 화면
+    @GET("diaries/{id}")
+    suspend fun getlog(@Path("id") id: Int) : Response<DiaryResponse>
+
+
 
     // 통계
     @GET("emotion/{userPk}/statistics/{dates}")
