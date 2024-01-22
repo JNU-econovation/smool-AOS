@@ -471,6 +471,8 @@ fun CalendarContents(
                                     if (existList[resultDay-1] == true) {
                                         Log.d("캘린더 circle 아이콘", "existList[resultDay]: ${existList[resultDay-1]}")
                                         Icon(Icons.Default.Circle, contentDescription = "circle", tint = Color.White, modifier = Modifier.size(10.dp))
+                                    } else {
+                                        Spacer(modifier = Modifier.size(10.dp))
                                     }
                                 } else {
                                     Log.d("캘린더 existList 오류","existList: ${existList.joinToString()}")
