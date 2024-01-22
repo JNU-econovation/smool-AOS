@@ -280,7 +280,7 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
 
 
 
-    if (write == true || detail == true) {
+    if (write == true) {
 
         Row(
             modifier = Modifier
@@ -324,7 +324,7 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
                     Icon(Icons.Default.Done, contentDescription = "Done", tint = Color.White)
                 }
             }
-            else {
+            if(standby == true || detail == true) {
                 IconButton(onClick = {
                     expanded = true
                     onMenuClick()
@@ -395,67 +395,159 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
 
     else{
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 5.dp, end = 5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        if (detail == true) {
 
-        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp, end = 15.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
 
-            Button(
-                onClick = {
+            ) {
+
+                Button(
+                    onClick = {
+                        // 작성X 화면으로 이동
+                        onBackClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    )
+
+                ) {
+                    Text(
+                        text = "<",
+                        fontSize = 30.sp
+                    )
+                }
+
+                Text(
+                    text = resultTime,
+                    fontSize = 28.sp,
+                    color = Color.White,
+                    modifier = Modifier.clickable(
+                        onClick = { openDialog.value = true }
+                    )
+                )
+
+                if (standby == false) {
+                    IconButton(onClick = {
+                        onDoneClick()
+                        Log.d("doneClick", "standby: $standby")
+                    }) {
+                        Icon(Icons.Default.Done, contentDescription = "Done", tint = Color.White)
+                    }
+                }
+                else {
+                    IconButton(onClick = {
+                        expanded = true
+                        onMenuClick()
+                        Log.d("menuClick", "standby: $standby")
+                    }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu", tint = Color.White)
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        offset = DpOffset((-32).dp, (-4).dp),
+                        modifier = Modifier
+                            .background(Color(0xFF594C7B))
+                            .padding(start = 16.dp)
+
+
+                    ) {
+
+                        DropdownMenuItem(
+                            text = { Text(text = "수정", color = Color.White)},
+                            onClick = {
+                                //counter++
+                                expanded = false
+                                onModify()
+
+                            },
+
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "삭제", color = Color.White)},
+                            onClick = {
+                                //counter++
+                                expanded = false
+                                deleteDialog = true
+                                onDelete()
+                            },
+                        )
+                    }
+                }
+
+            }
+
+        }
+        else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 5.dp, end = 5.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+
+            ) {
+
+                Button(
+                    onClick = {
 //                    val newDate = Calendar.getInstance()
 //                    newDate.time = date.value.time
 //                    newDate.add(Calendar.DATE, -1)
 //                    date.value = newDate
-                    calendarInstance.add(Calendar.DATE, -1)
-                    //resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
-                    updateResultTime()
-                    Log.d("ResultTimeDebug", "Updated resultTime minus: $resultTime")
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                )
+                        calendarInstance.add(Calendar.DATE, -1)
+                        //resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+                        updateResultTime()
+                        Log.d("ResultTimeDebug", "Updated resultTime minus: $resultTime")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    )
 
-            ) {
+                ) {
+                    Text(
+                        text = "<",
+                        fontSize = 30.sp
+                    )
+                }
+
                 Text(
-                    text = "<",
-                    fontSize = 30.sp
+                    text = resultTime,
+                    fontSize = 28.sp,
+                    color = Color.White,
+                    modifier = Modifier.clickable(
+                        onClick = { openDialog.value = true }
+                    )
                 )
-            }
-
-            Text(
-                text = resultTime,
-                fontSize = 28.sp,
-                color = Color.White,
-                modifier = Modifier.clickable(
-                    onClick = { openDialog.value = true }
-                )
-            )
 
 
-            Button(
-                onClick = {
+                Button(
+                    onClick = {
 //                    val newDate = Calendar.getInstance()
 //                    newDate.time = date.value.time
 //                    newDate.add(Calendar.DATE, +1)
 //                    date.value = newDate
-                    calendarInstance.add(Calendar.DATE, +1)
-                    //resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
-                    updateResultTime()
-                    Log.d("ResultTimeDebug", "Updated resultTime plus: $resultTime")
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                )) {
-                Text(
-                    text = ">",
-                    fontSize = 30.sp
-                )
+                        calendarInstance.add(Calendar.DATE, +1)
+                        //resultTime = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(calendarInstance.time)
+                        updateResultTime()
+                        Log.d("ResultTimeDebug", "Updated resultTime plus: $resultTime")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    )) {
+                    Text(
+                        text = ">",
+                        fontSize = 30.sp
+                    )
+                }
             }
         }
+
+
     }
 }
 
@@ -954,16 +1046,12 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
 
     var write by remember { mutableStateOf(false) }
-    //val calendarInstance = Calendar.getInstance()
-//    val time = remember {
-//        mutableStateOf(calendarInstance)
-//    }
     var count by remember { mutableStateOf(0) }
-    var contentSize by remember { mutableStateOf(0) }
-
     var standby by remember { mutableStateOf(false) }
     var update by remember { mutableStateOf(false) }
     var detail by remember { mutableStateOf(false) }
+    var done by remember { mutableStateOf(false) }
+
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -1081,7 +1169,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
                     Log.d("로그화면 contentList", "contentList: ${contentList.joinToString()}")
                     Log.d("로그화면 contentList", "contentList.size: ${contentList.size}")
-                    contentSize = contentList.size
+
 
 
 
@@ -1112,13 +1200,11 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
 
     Scaffold(
-//        topBar = {
-//            LogTopBar()
-//        },
+
         floatingActionButton = {
             if (write == false) {
                 LogFloatingActionButton(count) {
-                    write = !write   // 클릭 후에 버튼을 숨김
+                    write = true   // 클릭 후에 버튼을 숨김
                     count++
                     Log.d("floatingActionButtonClick", "count: $count")
                 }
@@ -1151,9 +1237,9 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                 ) {
 
                     Spacer(modifier = Modifier.height(10.dp))
-                    LogHeader(calendarInstance, resultTime, write, standby, detail, onBackClick = { write = !write; standby = !standby; },
-                        onDoneClick = { standby = !standby; focusManager.clearFocus(); update = !update },
-                        onMenuClick = {  }, onModify = { standby = !standby }, onDelete = { write = !write; count-- }, updateResultTime = :: updateResultTime)
+                    LogHeader(calendarInstance, resultTime, write, standby, detail, onBackClick = { write = false; standby = false; detail = false; },
+                        onDoneClick = { standby = true; focusManager.clearFocus(); update = true; done = true},
+                        onMenuClick = {  }, onModify = { standby = false }, onDelete = { write = false; count-- }, updateResultTime = :: updateResultTime)
                     //if(content == null || content == "") count--
                     Log.d("로그화면 update LogHeader 밑", "update: $update")
 
@@ -1204,11 +1290,25 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                             if (detail == false) {
                                 Column(modifier = Modifier.verticalScroll(scrollState)) {
                                     LogDiary(remember { mutableStateOf(contentList) }, onDetail = { content ->
-                                        detailContent = content; detail = !detail
+                                        detailContent = content; detail = true; standby = true;
                                     })
                                 }
                             } else {
-                                LogStandby(detailContent)
+                                if(standby == false) {  // 글박스 상세보기에서 수정 버튼 클릭
+
+                                    LogTextFieldMod(
+                                        content = detailContent,
+                                        onTextState = {updatedTextState ->
+                                            content = updatedTextState
+                                        },
+                                    )
+
+
+
+                                } else {
+                                    LogStandby(detailContent)
+                                }
+
                             }
 
 
@@ -1247,7 +1347,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                                 var tmp = DataSet(resultTime)
                                 Log.d("로그화면 DataSet 함수", "tmp: $tmp")
 
-                                if (realContent != "" && realContent != null) {
+                                if (realContent != "" && realContent != null ) {
                                     Log.d("로그화면 realContent", "realContent: $realContent")
 
                                     val diaryRequest =
@@ -1308,6 +1408,135 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
 
     }
 }
+
+
+//
+//@Composable
+//fun LogGet(detail) {
+//
+//    val scrollState = rememberScrollState()
+//    val coroutineScope = rememberCoroutineScope()
+//
+//    LaunchedEffect(detail) {
+//
+//        content = ""
+//        realContent = ""
+//        contentList.clear()
+//        isContentListLoaded.value = false
+//
+//
+//        coroutineScope.launch {
+//            Log.d("로그화면 클릭", "")
+//            Log.d("로그화면 클릭", "$resultTime")
+//
+//            var tmp = DataSet(resultTime)
+//            Log.d("로그화면 DataSet 함수", "tmp: $tmp")
+//
+//
+//
+//            val logRequest =
+//                UserPK(userPk = userPk)
+//            Log.d("로그화면 request", "$logRequest")
+//
+//            try {
+//
+//                Log.d("로그화면 1111", "1111")
+//                val response = myApi.log(logRequest.userPk, tmp)
+//                Log.d("로그화면 response.body", "${response.body()}")
+//                Log.d("로그화면 응답 코드", "HTTP status code: ${response.code()}")
+//                Log.d("로그화면 응답 성공 여부", "Is successful: ${response.isSuccessful}")
+//
+//
+//                if(response.isSuccessful) {
+//
+//                    Log.d("로그화면 response", "response is successful")
+//
+//                    val json = response.body()
+//                    Log.d("로그화면 json", "$json")
+//                    val status = json?.status
+//                    val message = json?.message
+//                    val data = json?.data
+//
+//                    happiness = data?.happiness!!.toInt()
+//                    gloom = data?.gloom!!.toInt()
+//                    anxiety = data?.anxiety!!.toInt()
+//                    stress = data?.stress!!.toInt()
+//                    sleep = data?.sleep!!.toInt()
+//                    val todayDiaries = data?.todayDiaries
+//
+//                    Log.d("로그화면 데이터 셋", "$status $message $data")
+//                    Log.d("로그화면 데이터 감정", "$happiness $gloom $anxiety $stress $sleep")
+//                    Log.d("로그화면 데이터 일기 리스트", "$todayDiaries")
+//
+//                    todayDiaries?.forEach { diaryExist ->
+//                        val diaryPk = diaryExist.diaryPk
+//                        val content = diaryExist.content
+//
+//                        if (content != "" || content != null) {
+//                            Log.d("로그화면 contentList 1", "contentList: $contentList")
+//                            contentList.add(content)
+//                            Log.d("로그화면 contentList 2", "contentList: $contentList")
+//                        }
+//
+//                        Log.d("로그화면 상세 데이터", "$diaryPk $content")
+//                    }
+//
+//                    Log.d("로그화면 contentList", "contentList: ${contentList.joinToString()}")
+//                    Log.d("로그화면 contentList", "contentList.size: ${contentList.size}")
+//
+//                }
+//
+//                else {
+//                    val errorMessage = response.errorBody()?.string()
+//                    Log.d("로그화면 오류 메시지", "Error message: $errorMessage")
+//                    val jsonObject = JSONObject(errorMessage)
+//                    val status = jsonObject.getInt("status")
+//                    val message = jsonObject.getString("message")
+//                    Log.d("로그화면 오류 상태 코드", "Error status: $status")
+//                    Log.d("로그화면 오류 메시지", "Error message: $message")
+//                }
+//
+//
+//            }catch (e:Exception){
+//                Log.d("로그 오류", "$e")
+//            }
+//
+//        }
+//    }
+//
+//
+//
+//    Box(modifier = Modifier
+//        .fillMaxWidth()
+//        .padding(16.dp)
+////                    .background(
+////                        color = Color.Transparent,
+////                        shape = RoundedCornerShape(8.dp)
+////                    )
+////        .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
+//        //.clickable { onToggle() }
+//    ) {
+//        Column(
+//            modifier = Modifier.padding(16.dp)
+//
+//        ) {
+//
+//            Column(modifier = Modifier.verticalScroll(scrollState)) {
+//
+//                Text(
+//                    text = "${getContent}",
+//                    color = Color.White
+//                )
+//            }
+//
+//
+//
+//
+//        }
+//
+//    }
+//
+//}
 
 @Composable
 fun LogStandby(content: String) {
@@ -1391,14 +1620,29 @@ fun LogTextField(onTextState: (String) -> Unit){
 
 }
 
-//@Composable
-//fun LogNav() {
-//
-//    val navController = rememberNavController()
-//
-//    NavHost(navController = navController, startDestination = "")
-//}
 
+@Composable
+fun LogTextFieldMod(content:String, onTextState: (String) -> Unit){
+
+    var textState by remember { mutableStateOf(content) }
+
+
+    TextField(
+        value = textState,
+        onValueChange = { newText: String ->
+            textState = newText
+            onTextState(newText)
+        },
+        textStyle = TextStyle(color = Color.White),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+
+        shape = RoundedCornerShape(16.dp),
+
+        )
+
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
