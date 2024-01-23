@@ -456,7 +456,7 @@ fun CalendarContents(
                                         .background(
                                             shape = CircleShape,
                                             color = if (todayDate == resultDay && todayTime == resultTime) Color(
-                                                0xFF5A5788
+                                                0xFF565298
                                             ) else Color.Transparent
                                         ),
                                     contentAlignment = Alignment.Center

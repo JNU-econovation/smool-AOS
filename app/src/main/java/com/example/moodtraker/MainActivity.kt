@@ -84,7 +84,7 @@ fun AppMain(){
     Scaffold(
         bottomBar = {
             BottomAppBar(
-                containerColor = Color(0xFF5A5788)
+                containerColor = Color(0xFF6E69AD)
             ) {
                 Row(
                     modifier = Modifier
