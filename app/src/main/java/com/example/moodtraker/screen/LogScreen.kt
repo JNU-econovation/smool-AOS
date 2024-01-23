@@ -310,7 +310,7 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
 
             Text(
                 text = resultTime,
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 color = Color.White,
                 modifier = Modifier.clickable(
                     onClick = { openDialog.value = true }
@@ -425,7 +425,7 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
 
                 Text(
                     text = resultTime,
-                    fontSize = 28.sp,
+                    fontSize = 24.sp,
                     color = Color.White,
                     modifier = Modifier.clickable(
                         onClick = { openDialog.value = true }
@@ -518,7 +518,7 @@ fun LogHeader(calendarInstance: Calendar, resultTime: String, write: Boolean, st
 
                 Text(
                     text = resultTime,
-                    fontSize = 28.sp,
+                    fontSize = 24.sp,
                     color = Color.White,
                     modifier = Modifier.clickable(
                         onClick = { openDialog.value = true }
@@ -642,7 +642,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = null,
-                        tint = Color(0xFFBB9DC9),
+                        tint = Color(0xFFF3F0F0),
                         modifier = Modifier
                             .clickable {
                                 expanded = !expanded
@@ -657,7 +657,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     ) {
                         Text(
                             text = "행복",
-                            color = Color(0xFFBB9DC9),
+                            color = Color(0xFFF3F0F0),
                         )
                     }
                     Box(
@@ -667,7 +667,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     ) {
                         Text(
                             text = "우울",
-                            color = Color(0xFFBB9DC9),
+                            color = Color(0xFFF3F0F0),
                         )
                     }
                     Box(
@@ -677,7 +677,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     ) {
                         Text(
                             text = "불안",
-                            color = Color(0xFFBB9DC9),
+                            color = Color(0xFFF3F0F0),
                         )
                     }
                     Box(
@@ -687,7 +687,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     ) {
                         Text(
                             text = "스트레스",
-                            color = Color(0xFFBB9DC9),
+                            color = Color(0xFFF3F0F0),
                         )
                     }
                     Box(
@@ -697,7 +697,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     ) {
                         Text(
                             text = "수면시간",
-                            color = Color(0xFFBB9DC9),
+                            color = Color(0xFFF3F0F0),
                         )
                     }
                 }
@@ -746,7 +746,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = null,
-                        tint = Color(0xFFBB9DC9),
+                        tint = Color(0xFFF3F0F0),
                         modifier = Modifier
                             .clickable {
                                 expanded = !expanded
@@ -761,7 +761,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                 ) {
                     Text(
                         text = "행복",
-                        color = Color(0xFFBB9DC9),
+                        color = Color(0xFFF3F0F0),
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
@@ -781,7 +781,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                 ) {
                     Text(
                         text = "우울",
-                        color = Color(0xFFBB9DC9),
+                        color = Color(0xFFF3F0F0),
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
@@ -797,7 +797,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                 ) {
                     Text(
                         text = "불안",
-                        color = Color(0xFFBB9DC9),
+                        color = Color(0xFFF3F0F0),
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
@@ -813,7 +813,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                 ) {
                     Text(
                         text = "스트레스",
-                        color = Color(0xFFBB9DC9),
+                        color = Color(0xFFF3F0F0),
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
@@ -829,7 +829,7 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                 ) {
                     Text(
                         text = "수면시간",
-                        color = Color(0xFFBB9DC9),
+                        color = Color(0xFFF3F0F0),
                         modifier = Modifier.width(90.dp),
                         textAlign = TextAlign.Center
                     )
@@ -883,9 +883,9 @@ fun EmotionSlider(initialValue: MutableState<Int>, onEmotionChanged: (Int) -> Un
                 onEmotionChanged(sliderPosition.roundToInt())
             },
             colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.secondary,
-                activeTrackColor = MaterialTheme.colorScheme.secondary,
-                inactiveTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                thumbColor = MaterialTheme.colorScheme.secondaryContainer,
+                activeTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                inactiveTrackColor = MaterialTheme.colorScheme.secondary,
             ),
             steps = 9,
             valueRange = 0f..10f
@@ -976,7 +976,7 @@ fun LogDiary(contentList : MutableState<List<String>>, onDetail: (String) -> Uni
 
             Box(modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
 //                    .background(
 //                        color = Color.Transparent,
 //                        shape = RoundedCornerShape(8.dp)
@@ -1246,7 +1246,7 @@ fun LogScaffold(resultTime: String?, resultDay: Int?){
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
                     LogHeader(calendarInstance, resultTime, write, standby, detail, onBackClick = { write = false; standby = false; detail = false; },
                         onDoneClick = { standby = true; focusManager.clearFocus(); update = true; done = true},
                         onMenuClick = {  }, onModify = { standby = false }, onDelete = { write = false; count-- }, updateResultTime = :: updateResultTime)
