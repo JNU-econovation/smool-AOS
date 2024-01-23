@@ -113,7 +113,7 @@ fun AppMain(){
                             Icon(
                                 imageVector = nav.icon,
                                 contentDescription = nav.name,
-                                tint = if (isCurrentRoute) Color.White else Color(0xFFD4D6E9),
+                                tint = if (isCurrentRoute) Color.White else Color(0xFFB9B4DE),
                                 modifier = Modifier.size(30.dp)
                             )
 //                            Text(
