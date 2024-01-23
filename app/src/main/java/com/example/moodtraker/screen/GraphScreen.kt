@@ -495,7 +495,7 @@ fun monthChart(happinessList: SnapshotStateList<Int>, gloomList: SnapshotStateLi
 
     val maxYRange = 10
 
-    val colorList = listOf(Color(0xFF3E3B79), Color(0xFFE16F6F), Color(0xFFB3F4FD), Color(0xFFF8FA93), Color(0xFF97F98F))
+    val colorList = listOf(Color(0xFF3E3B79), Color(0xFFFAAEAE), Color(0xFFB3F4FD), Color(0xFFF9FBB6), Color(0xFFB8FFB2))
 
 
     ProvideChartStyle(rememberChartStyle(listOf(Color.White))) {
@@ -582,7 +582,7 @@ fun yearChart() {
 
     val maxYRange = 10
 
-    val colorList = listOf(Color(0xFF3E3B79), Color(0xFFE16F6F), Color(0xFFB3F4FD), Color(0xFFF8FA93), Color(0xFF97F98F))
+    val colorList = listOf(Color(0xFF3E3B79), Color(0xFFFAAEAE), Color(0xFFB3F4FD), Color(0xFFF9FBB6), Color(0xFFB8FFB2))
 
 
     ProvideChartStyle(rememberChartStyle(listOf(Color.White))) {
