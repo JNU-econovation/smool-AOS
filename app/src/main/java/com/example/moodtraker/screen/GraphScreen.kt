@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.MoreVert
@@ -111,6 +113,7 @@ fun GraphScreen(){
     ) {
 
         val coroutineScope = rememberCoroutineScope()
+        val scrollState = rememberScrollState()
 
         val userPk = user.userPk
 
@@ -268,18 +271,20 @@ fun GraphScreen(){
         }
 
 
-        Column {
-            Spacer(modifier = Modifier.height(20.dp))
+        Column(modifier = Modifier.verticalScroll(scrollState)) {
+            Spacer(modifier = Modifier.height(60.dp))
 //            Icon(Icons.Default.HelpOutline, contentDescription = "help",tint = Color.White,
 //                modifier = Modifier
 //                    .align(Alignment.End)
 //                    .padding(end = 16.dp))
             ChartHeader(time, resultTime)
+            Spacer(modifier = Modifier.height(16.dp))
             monthChart(happinessList, gloomList, anxietyList, stressList, sleepList)
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(50.dp))
             ChartHeaderYear(timeYear)
             yearChart()
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
         }
 
