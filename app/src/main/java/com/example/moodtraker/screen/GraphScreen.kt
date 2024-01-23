@@ -521,10 +521,11 @@ fun monthChart(happinessList: SnapshotStateList<Int>, gloomList: SnapshotStateLi
             spacing = 0.dp
         )
 
-        var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFE16F6F), lineBackgroundShader = null))) // 핑크
-        var gloomChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB3F4FD), lineBackgroundShader = null))) // 하늘
-        var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFF8FA93), lineBackgroundShader = null))) // 노랑
-        var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFF97F98F), lineBackgroundShader = null))) // 초록
+        //, lineBackgroundShader = null
+        var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFFAAEAE)))) // 핑크
+        var gloomChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB3F4FD)))) // 하늘
+        var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFF9FBB6)))) // 노랑
+        var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB8FFB2)))) // 초록
 
         //val composedChart = remember(sleepChart, happyChart, gloomChart, anxietyChart, stressChart) { sleepChart + happyChart + gloomChart + anxietyChart + stressChart }
         val composedChart = remember(
@@ -599,10 +600,10 @@ fun yearChart() {
             ),
             spacing = 0.dp
         )
-        var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFE16F6F)))) // 핑크
+        var happyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFFAAEAE)))) // 핑크
         var gloomChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB3F4FD)))) // 하늘
-        var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFF8FA93)))) // 노랑
-        var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFF97F98F)))) // 초록
+        var anxietyChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFF9FBB6)))) // 노랑
+        var stressChart = lineChart(lines = listOf(lineSpec(lineColor = Color(0xFFB8FFB2)))) // 초록
 
         //val composedChart = remember(sleepChart, happyChart, gloomChart, anxietyChart, stressChart) { sleepChart + happyChart + gloomChart + anxietyChart + stressChart }
         val composedChart = remember(
