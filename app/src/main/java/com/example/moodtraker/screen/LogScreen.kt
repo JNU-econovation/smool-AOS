@@ -974,6 +974,8 @@ fun LogDiary(contentList : MutableState<List<String>>, onDetail: (String) -> Uni
 
         if (contentList.value[i] != null && contentList.value[i]!="") {
 
+            val displayText = if (contentList.value[i].length > 115) contentList.value[i].substring(0, 115) + "..." else contentList.value[i]
+
             Box(modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
@@ -988,7 +990,7 @@ fun LogDiary(contentList : MutableState<List<String>>, onDetail: (String) -> Uni
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "${contentList.value[i]}",
+                        text = "${displayText}",
                         color = Color.White
                     )
 
