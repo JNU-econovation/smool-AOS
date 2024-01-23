@@ -348,7 +348,7 @@ fun CalendarContents(
 
         Text(
             text = resultTime,
-            fontSize = 28.sp,
+            fontSize = 25.sp,
             color = Color.White
         )
 
@@ -376,7 +376,7 @@ fun CalendarContents(
     }
 
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(28.dp))
 
 
     // 요일 이름
@@ -393,11 +393,13 @@ fun CalendarContents(
                     text = it,
                     color = Color.White,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold
+                    //fontWeight = FontWeight.ExtraBold
                 )
             }
         }
     }
+
+    Spacer(modifier = Modifier.height(8.dp))
 
     // 캘린더 날짜
 
