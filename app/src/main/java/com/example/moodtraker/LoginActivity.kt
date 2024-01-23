@@ -75,8 +75,10 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import java.text.DateFormat
 
@@ -190,6 +192,17 @@ data class DiaryGet(
     val sleep : Int
 )
 
+
+// 일기 수정
+data class DiaryPutPost(
+    val diaryPk: Int,
+    val content: String,
+    val happiness: Int,
+    val gloom: Int,
+    val anxiety: Int,
+    val stress: Int,
+    val sleep: Int
+)
 
 
 
@@ -334,6 +347,20 @@ interface MyApi {
     // 일기 읽기 화면
     @GET("diaries/{id}")
     suspend fun getlog(@Path("id") id: Int) : Response<DiaryResponse>
+
+
+    // 일기 수정
+    @PUT("diaries/{id}")
+    suspend fun modify(
+        @Path("id") id: Int,
+        @Body post: DiaryPutPost
+    ) : Response<BaseResponse>
+
+
+
+    // 일기 삭제
+    @DELETE("diaries/{id}")
+    suspend fun delete(@Path("id") id: Int) : Response<BaseResponse>
 
 
 
