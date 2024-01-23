@@ -708,31 +708,31 @@ fun emotionBox(happiness : MutableState<Int>, gloom : MutableState<Int>, anxiety
                     //horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     //
-                    //Spacer(modifier = Modifier.weight(0.8f))
+                    Spacer(modifier = Modifier.weight(0.8f))
                     Text(
                         text = happiness.value.toString(),
                         color = Color.White,
-                        modifier = Modifier.padding(start = 56.dp)
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
                         gloom.value.toString(),
                         color = Color.White,
-                        modifier = Modifier.padding(start = 40.dp)
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
                         anxiety.value.toString(),
                         color = Color.White,
-                        modifier = Modifier.padding(start = 42.dp)
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
                         stress.value.toString(),
                         color = Color.White,
-                        modifier = Modifier.padding(start = 54.dp)
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
                         sleep.value.toString(),
                         color = Color.White,
-                        modifier = Modifier.padding(start = 60.dp)
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
