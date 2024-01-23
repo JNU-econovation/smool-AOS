@@ -55,17 +55,17 @@ fun SettingContent() {
 
 
     ) {
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "설정",
             color = Color.White,
-            fontSize = 28.sp,
+            fontSize = 24.sp,
             modifier = Modifier.padding(20.dp)
         )
-        Divider(color = Color.White)
+        Divider(color = Color(0xFF9E9FBD))
         Row(
 
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 20.dp)
         ) {
             Image(
                 modifier = Modifier.size(50.dp),
@@ -79,15 +79,15 @@ fun SettingContent() {
             }
 
         }
-        Divider(color = Color.White)
+        Divider(color = Color(0xFF9E9FBD))
         Text(text = "알림", color = Color.White, modifier = Modifier.padding(20.dp))
-        Divider(color = Color.White)
+        Divider(color = Color(0xFF9E9FBD))
         Text(text = "테마", color = Color.White, modifier = Modifier.padding(20.dp))
-        Divider(color = Color.White)
+        Divider(color = Color(0xFF9E9FBD))
         Text(text = "공지사항", color = Color.White, modifier = Modifier.padding(20.dp))
-        Divider(color = Color.White)
+        Divider(color = Color(0xFF9E9FBD))
         Text(text = "QnA", color = Color.White, modifier = Modifier.padding(20.dp))
-        Divider(color = Color.White)
+        Divider(color = Color(0xFF9E9FBD))
         Text(text = "정보", color = Color.White, modifier = Modifier.padding(20.dp))
     }
 }
